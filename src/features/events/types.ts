@@ -1,0 +1,20 @@
+export const EVENT_TYPE = [
+  "created",
+  "assigned",
+  "email_sent",
+  "email_received",
+  "comment",
+  "escalated",
+  "status_changed",
+  "closed",
+  "n1_sent",
+  "n2_sent",
+  "n3_sent",
+  "ping",
+  "corrected",
+  "ai_suggestion",
+  "ai_categorized",
+  "ai_anomaly",
+  "ai_eta",
+] as const;
+export type EventType = (typeof EVENT_TYPE)[number];

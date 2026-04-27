@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# URPE Command Center
 
-## Getting Started
+Single pane of glass para operar el ecosistema URPE en tiempo real:
+tareas, agentes IA (N18, Sofía, Rocky, Mónica), emails, métricas y
+sugerencias de acción generadas por LLM — todo desde un panel unificado.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend** Next.js 16 (App Router + RSC), Tailwind v4, shadcn/ui, TanStack Query
+- **Backend** Supabase (Postgres + RLS + Edge Functions + Realtime + pgvector)
+- **AI** OpenRouter → `anthropic/claude-opus-4.7` y `openai/gpt-5.2`
+- **Auth** Supabase Auth + Google SSO (Workspace URPE)
+- **Deploy** Vercel (Hobby) + Supabase Cloud
+- **Mobile** PWA instalable (Serwist + Web Push)
+
+## Arquitectura
+
+Vertical slices por feature (`src/features/*`) con CQRS ligero sobre un backend
+event-sourced: cada cambio se persiste como un row append-only en `fact_event`
+y los read models (vistas materializadas) se reconstruyen automáticamente.
+
+```
+src/
+├── app/                  Next.js App Router (UI shell + routes)
+├── features/             Vertical slices: tasks, events, followups, ai, ...
+├── components/           shadcn primitives + cross-feature
+└── lib/
+    ├── supabase/         server / client / service-role / middleware
+    ├── openrouter/       LLM client + prompts
+    ├── time/             helpers de horas hábiles
+    └── env.ts            validación de env con Zod
+
+db/
+├── migrations/           SQL versionado (Supabase CLI)
+└── seed/
+
+scripts/                  one-shots (importar dump SQLite, etc.)
+docs/                     plan del proyecto + dumps de referencia
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+cp .env.example .env.local   # rellenar con keys reales
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Variables requeridas (ver `.env.example`):
 
-## Learn More
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENROUTER_API_KEY`
 
-To learn more about Next.js, take a look at the following resources:
+## Roadmap
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ver [`ROADMAP.md`](ROADMAP.md). Plan original en [`docs/plan-del-proyecto.md`](docs/plan-del-proyecto.md).

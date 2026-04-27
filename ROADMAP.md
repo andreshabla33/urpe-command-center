@@ -1,0 +1,124 @@
+# URPE Command Center — Roadmap
+
+> Single pane of glass para operar el ecosistema URPE en tiempo real.
+> Plan completo en [`docs/plan-del-proyecto.md`](docs/plan-del-proyecto.md).
+
+## Estado actual
+
+**Progreso**: Fases 0, 1, 2, 3, 4 completadas. **MVP listo.**
+
+| Métrica | Valor |
+|---|---|
+| Rutas vivas | 11 (`/`, `/login`, `/auth/callback`, `/kanban`, `/calendar`, `/graph`, `/analytics`, `/tasks/[id]`, `/icon`, `/apple-icon`, `/manifest.webmanifest`) |
+| Tablas Postgres | 8 + MV `mv_task_current_state` + RLS en cada una |
+| Edge Functions | 3 (`suggest-action`, `batch-embeddings`, `daily-summary`) |
+| Cron jobs activos | 6 (refresh MV 1m, embeddings 30m, suggest 60m, anomalies 60m, etas 60m, daily-summary 24h) |
+| Personas (`dim_person`) | 59 (7 admins) |
+| Tasks (`dim_task`) | 30 (importadas del dump N18) |
+| Events (`fact_event`) | 106+ (append-only con replay-unique constraint) |
+| Emails (`fact_email`) | 31 |
+| Embeddings (`dim_embedding`) | 30/30 (halfvec 3072 + HNSW) |
+| Daily summaries | 1 (probado, 1671 chars Markdown) |
+| Build status | `pnpm build` ✅, `pnpm exec tsc --noEmit` ✅ |
+| PWA | manifest + service worker + Web Push (VAPID configurado) |
+| Costo LLM acumulado | ~$0.11 USD |
+
+**Modelos AI canónicos**: `anthropic/claude-opus-4.7` (reasoning) + `openai/gpt-5.2` (rápido) vía OpenRouter.
+
+---
+
+## Fase 0 — Setup ✅
+- [x] Scaffold Next.js 16 + React 19 + Tailwind v4 + TypeScript 5
+- [x] Estructura por vertical slices (`src/features/*`)
+- [x] Supabase clients (`server`, `client`, `service-role`, `middleware`)
+- [x] OpenRouter client con modelos canónicos (`claude-opus-4.7`, `gpt-5.2`)
+- [x] Helper de horas hábiles para cadencia N18 (lun-vie 9-18 EST)
+- [x] Validación de env vars con Zod (`src/lib/env.ts`)
+- [x] shadcn/ui configurado (`components.json`, theme neutral)
+- [x] Skill `urpe-architecture` instalada (`~/.claude/skills/urpe-architecture/SKILL.md`)
+- [x] Google OAuth Client + Supabase Auth provider configurado
+- [x] Acceso al repo GitHub `Urpeailab-command-center` aceptado
+
+## Fase 1 — Core ✅
+- [x] Migration SQL: 6 tablas + RLS + MV `mv_task_current_state` + triggers append-only
+  - [x] SQL escrito en `supabase/migrations/20260427212712_init.sql`
+  - [x] Aplicada al proyecto Supabase `vecspltvmyopwbjzerow` vía Management API
+  - [x] Tipos TS generados (`src/lib/supabase/database.types.ts`)
+- [x] Migration: importar `wp_team_humano` (empresa_id 4 + 13) → `dim_person`
+  - [x] 59 personas importadas, 7 admins (Diego, Andres + 5 que ya tenían rol admin en wp_team_humano)
+  - [x] Enum de roles ampliado a 11 valores reales del ecosistema URPE
+- [x] Script: importar `docs/n18_followups_dump.sql` → `fact_event` + `dim_task` + `fact_email`
+  - [x] `scripts/import-n18-dump.ts` (better-sqlite3 in-memory + Supabase upserts)
+  - [x] 30 tasks, 31 emails, 106 events, MV refreshada
+  - [x] Idempotente vía `fact_event_replay_unique` constraint
+- [x] Auth: integración Google SSO en código (login page + callback handler)
+  - [x] Server Action `signInWithGoogle` con `hd=urpeailab.com` (restringe dominio en Google)
+  - [x] Callback route `/auth/callback` valida dominio post-login y rechaza foráneos
+  - [x] `src/proxy.ts` redirige a `/login` cualquier ruta no autenticada
+- [—] ~~Parser `PENDIENTES.md` (GitHub) → `fact_event`~~ — **descartado**
+  - El pipeline N18 SQLite → Supabase ya cubre la entrada de pendientes. Si en el futuro
+    hace falta input manual vía Markdown, se agrega sin bloquear nada.
+- [x] Vista lista: filtros server-side (owner, project, status, age) + heatmap de antigüedad
+  - [x] `src/features/tasks/queries.ts` (lee de `mv_task_current_state`)
+  - [x] Filtros vía URL searchParams + Client Component `task-filters.tsx`
+  - [x] Heatmap por color (verde <3d, amarillo 3-7d, rojo ≥7d)
+- [x] Sidebar + KPI strip (4 métricas: abiertas, atascadas >7d, p0 activas, response time avg)
+  - [x] Layout `(dashboard)/layout.tsx` con redirect server-side si no auth
+  - [x] Sidebar 240-280px con nav items y signout
+
+## Fase 2 — Real-time + multi-vista ✅
+- [x] Supabase Realtime suscrito a `fact_event` y `dim_task`
+  - [x] Migration `enable_realtime` añade tablas a `supabase_realtime` publication
+  - [x] `RealtimeProvider` Client Component con `router.refresh()` debounced 250ms
+- [x] Kanban drag&drop con `@hello-pangea/dnd`
+  - [x] Server Action `setTaskStatus` valida con Zod, escribe via service_role, emite `fact_event`
+  - [x] Optimistic UI con `useOptimistic` (React 19)
+- [x] Vista calendario por `due_date` (mensual, navegable con `?month=YYYY-MM`)
+- [x] Vista grafo dependencias con `@xyflow/react` (agrupada por owner, edges por proyecto)
+- [x] Keyboard shortcuts (`g+l/k/c/g/i` para navegar; modifier `g` con timeout 1.5s)
+
+## Fase 3 — AI nativo ✅
+- [x] Edge Function `suggest-action` (Claude Opus 4.7) sobre tareas atascadas
+  - [x] Deployada en `https://vecspltvmyopwbjzerow.functions.supabase.co/suggest-action`
+  - [x] Cron `pg_cron` cada hora (`:15`); soporta `?force=1&limit=N` para test manual
+  - [x] Probada: 3 sugerencias generadas, output coherente (`wait`/`ping`/`escalate`)
+- [x] Server Action `categorizeTask` (gpt-5.2) manual desde task detail
+  - [x] Devuelve `{project_id, priority, category}` con Zod validado
+  - [x] Update `dim_task` + emite `fact_event(ai_categorized)`
+- [x] Anomaly detection: tiempo respuesta vs p95 histórico (función SQL `analyze_anomalies`)
+  - [x] Programada vía pg_cron `:20` cada hora
+  - Espera histórico de tasks cerradas para producir output
+- [x] Predict completion via avg simple (función SQL `analyze_etas`)
+  - [x] Programada vía pg_cron `:25` cada hora
+- [x] pgvector + embeddings `text-embedding-3-large` (`halfvec(3072)` + HNSW)
+  - [x] Edge Function `batch-embeddings` deployada
+  - [x] Cron cada 30min; ya generó embeddings para las 30 tasks existentes
+- [—] ~~Embed Gmail thread en panel lateral~~ — diferido (requiere Gmail OAuth scope + setup adicional)
+- [x] Botón ping → emite `fact_event(ping)` desde la UI (Server Action `pingTask`)
+- [x] Task detail page `/tasks/[id]` con timeline de eventos + sidebar de acciones
+- [x] UI: `SuggestionBadge` inline en lista de tareas
+
+## Fase 4 — PWA + Push + analytics ✅
+- [x] Manifest + iconos + Serwist service worker
+  - [x] `app/manifest.ts`, `app/icon.tsx`, `app/apple-icon.tsx` (auto-generados con ImageResponse)
+  - [x] Serwist v9.5 con `cacheOnNavigation` + `reloadOnOnline`
+  - [x] Service worker en `src/app/sw.ts` precachea + maneja `push` y `notificationclick`
+- [x] Web Push notifications (VAPID)
+  - [x] VAPID keys generadas y guardadas en `.env.local`
+  - [x] Tabla `push_subscription` con RLS
+  - [x] Server Actions `subscribePush` / `unsubscribePush` / `sendPushTo`
+  - [x] Toggle UI en sidebar
+- [x] Cmd+K command palette
+  - [x] shadcn `Command` + `Dialog` con listener Cmd/Ctrl+K
+  - [x] Navegación + búsqueda fuzzy de tasks (cmdk)
+  - [x] **NL parsing con gpt-5.2** (`parseNlCommand`) cuando query no matchea
+- [x] Burn-down chart (Recharts AreaChart, últimos 30 días)
+- [x] Heatmap saturación por persona (status × owner_email, intensidad relativa)
+- [x] Resúmenes ejecutivos diarios (Claude Opus 4.7)
+  - [x] Edge Function `daily-summary` deployada
+  - [x] Tabla `daily_summary` con unique constraint por `date_key` (idempotente)
+  - [x] Cron pg_cron diario 12:00 UTC (8am EST)
+  - [x] **Probada**: 1671 chars de Markdown ejecutivo generado correctamente
+  - [x] Email opcional vía Resend (requiere `RESEND_API_KEY`); si no, queda guardado y visible en `/analytics`
+- [x] Página `/analytics` muestra resumen + burn-down + heatmap
+- [x] Sidebar y keyboard shortcuts ampliados con `g+a` para Analytics
