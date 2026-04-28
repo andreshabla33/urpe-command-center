@@ -10,6 +10,11 @@ const POLL_MS = 5000;
 export function OfflineIndicator() {
   const online = useOnlineStatus();
   const [queued, setQueued] = useState<number>(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,6 +40,7 @@ export function OfflineIndicator() {
     }
   }, [online]);
 
+  if (!mounted) return null;
   if (online && queued === 0) return null;
 
   return (

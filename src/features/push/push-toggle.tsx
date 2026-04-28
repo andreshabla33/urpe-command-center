@@ -16,9 +16,11 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
 export function PushToggle() {
   const [state, setState] = useState<State>("idle");
   const [supported, setSupported] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window === "undefined") return;
     if (
       !("serviceWorker" in navigator) ||
@@ -41,7 +43,7 @@ export function PushToggle() {
     });
   }, []);
 
-  if (!supported) return null;
+  if (!mounted || !supported) return null;
 
   const vapidKey = publicEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   if (!vapidKey) return null;
