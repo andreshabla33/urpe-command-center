@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
-import type { TaskFilters } from "./schema";
+import { TaskFiltersSchema, type TaskFilters } from "./schema";
 
 type RawTaskRow = Database["public"]["Views"]["mv_task_current_state"]["Row"];
 type FactEventRow = Database["public"]["Tables"]["fact_event"]["Row"];
@@ -18,18 +18,34 @@ export type TaskRow = RawTaskRow & { suggestion: AiSuggestion | null };
 
 const ACTIVE_STATUSES = ["backlog", "in_progress", "blocked", "escalated"] as const;
 
-export async function getTasks(filters: TaskFilters): Promise<TaskRow[]> {
+export async function getTasks(
+  input: Partial<TaskFilters> = {},
+): Promise<TaskRow[]> {
+  const filters = TaskFiltersSchema.parse(input);
   const supabase = await createClient();
   let query = supabase
     .from("mv_task_current_state")
     .select("*")
-    .order("created_at", { ascending: false, nullsFirst: false });
+    .order(filters.sort, {
+      ascending: filters.dir === "asc",
+      nullsFirst: false,
+    });
 
-  if (filters.owner) query = query.eq("owner_email", filters.owner);
+  if (filters.owner === "unassigned") {
+    query = query.is("owner_email", null);
+  } else if (filters.owner) {
+    query = query.eq("owner_email", filters.owner);
+  }
   if (filters.project) query = query.eq("project_id", filters.project);
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.age === "7d") query = query.gte("age_days", 7);
   if (filters.age === "30d") query = query.gte("age_days", 30);
+  if (filters.q) {
+    const escaped = filters.q.replace(/[%_]/g, (c) => `\\${c}`);
+    query = query.or(
+      `title.ilike.%${escaped}%,description.ilike.%${escaped}%,id.ilike.%${escaped}%`,
+    );
+  }
 
   const { data, error } = await query;
   if (error) throw error;
@@ -38,6 +54,21 @@ export async function getTasks(filters: TaskFilters): Promise<TaskRow[]> {
 
   const ids = tasks.map((t) => t.id).filter((id): id is string => id != null);
   return attachSuggestions(tasks, ids);
+}
+
+export type StatusCounts = Record<string, number>;
+
+export async function getStatusCounts(): Promise<StatusCounts> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mv_task_current_state")
+    .select("status");
+  const counts: StatusCounts = {};
+  for (const row of data ?? []) {
+    if (!row.status) continue;
+    counts[row.status] = (counts[row.status] ?? 0) + 1;
+  }
+  return counts;
 }
 
 async function attachSuggestions(

@@ -187,6 +187,17 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 
 ---
 
+## Fase 7 — List enhancements (en progreso)
+
+- [x] **Search por texto** (input con shortcut `/`) — `?q=…`, ilike sobre title/description/id
+- [x] **Sort por columna** — click en header (ID, Status, Edad, Prio) toggle asc/desc, persistido en URL
+- [x] **Conteo por status en filtros** — `getStatusCounts()` agrega `(N)` al lado de cada option
+- [x] **Vista "Sin asignar"** — opción extra en filter Owner que matchea `owner_email IS NULL`
+- [ ] **Quick action en hover** — mini menú de status sin entrar al detail (diferido)
+- [ ] **Densidad compacta toggle** — localStorage + data attribute en `<html>` (diferido)
+
+---
+
 ## Fase 6 — Polish del plan original (en progreso)
 
 ### 6.1 Vista de agentes IA (N18, Sofía, Mónica, Rocky) — pendiente

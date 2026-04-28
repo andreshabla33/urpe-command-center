@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 import { TaskFiltersSchema } from "@/features/tasks/schema";
-import { getKpis, getTasks, listOwners } from "@/features/tasks/queries";
+import {
+  getKpis,
+  getStatusCounts,
+  getTasks,
+  listOwners,
+} from "@/features/tasks/queries";
 import { TaskRow } from "@/features/tasks/components/task-row";
 import { TaskListHeader } from "@/features/tasks/components/task-list-header";
 import { KpiStrip } from "@/components/shared/kpi-strip";
@@ -18,12 +23,16 @@ export default async function HomePage({ searchParams }: PageProps) {
     project: raw.project,
     status: raw.status,
     age: raw.age,
+    q: raw.q,
+    sort: raw.sort,
+    dir: raw.dir,
   });
 
-  const [kpis, tasks, owners] = await Promise.all([
+  const [kpis, tasks, owners, statusCounts] = await Promise.all([
     getKpis(),
     getTasks(filters),
     listOwners(),
+    getStatusCounts(),
   ]);
 
   return (
@@ -41,7 +50,11 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <div className="border-b px-6 py-3">
         <Suspense fallback={null}>
-          <TaskFilters owners={owners} current={filters} />
+          <TaskFilters
+            owners={owners}
+            current={filters}
+            statusCounts={statusCounts}
+          />
         </Suspense>
       </div>
 
@@ -52,7 +65,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           </p>
         ) : (
           <>
-            <TaskListHeader />
+            <TaskListHeader sort={filters.sort} dir={filters.dir} />
             <MotionList>
               {tasks.map((t) => (
                 <TaskRow key={t.id} task={t} />
