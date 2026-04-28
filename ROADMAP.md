@@ -141,12 +141,17 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 - [x] Deploy en producción: `https://urpe-command-center.vercel.app/api/webhooks/github`.
 - [ ] Setup en GitHub (3 min, ver pasos abajo).
 
-### 5.4 Kapso webhook (WhatsApp)
-
-- [ ] **Webhook `/api/webhooks/kapso/route.ts`** — verifica `X-Kapso-Signature` con shared secret.
-- [ ] **Mapping número → owner_email**: lookup en `wp_team_humano.telefono` (normalizado).
-- [ ] **Emit** `fact_event(comment)` con `metadata: { source: "kapso", phone, message }`.
-- [ ] **Vinculación a task**: por convención el primer mensaje del agente debe contener `URPE-XXX-NNN`; si no, queda como evento huérfano (visible en feed global pero sin task).
+### 5.4 Kapso webhook (WhatsApp) — bloqueado por decisión N18
+- [x] Webhook `/api/webhooks/kapso/route.ts` con shared-token verify (query+headers).
+- [x] Schema Zod permisivo (passthrough) hasta tener payload Kapso real.
+- [x] Linker `phone → owner_email` vía `wp_team_humano.telefono` (exact + suffix).
+- [x] `resolveTaskFromText` por regex `URPE-XXX-NNN`.
+- [x] Emit `fact_event(comment)` con `metadata.source=kapso`, idempotente.
+- [x] Helper `lib/phone/normalize.ts`.
+- [x] Deploy en producción: `https://urpe-command-center.vercel.app/api/webhooks/kapso`.
+- [ ] **Bloqueado**: Diego/N18 debe confirmar source-of-truth de eventos Kapso.
+  Opciones: (a) N18 publica a `fact_event`, (b) webhook directo Command Center,
+  (c) dual con dedup. Mensaje pendiente a N18 para coordinar.
 
 ### 5.5 Observabilidad (Sentry + PostHog)
 

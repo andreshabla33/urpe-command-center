@@ -9,6 +9,7 @@ import { CreateTaskSchema } from "./schema";
 import { chat, OPENROUTER_MODELS } from "@/lib/openrouter/client";
 import { CategorizationSchema } from "@/features/ai/schema";
 import { CATEGORIZE_TASK_SYSTEM } from "@/features/ai/prompts";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 const SetStatusSchema = z.object({
   taskId: z.string().min(1),
@@ -123,6 +124,16 @@ export async function createTask(
   await supabase.rpc("refresh_mv_task_current_state");
   revalidatePath("/");
   revalidatePath("/kanban");
+
+  await captureServerEvent({
+    email: user.email,
+    event: "task_created",
+    properties: {
+      task_id: parsed.data.id,
+      priority: parsed.data.priority,
+      owner_email: parsed.data.owner_email,
+    },
+  });
 
   return { ok: true, id: parsed.data.id };
 }

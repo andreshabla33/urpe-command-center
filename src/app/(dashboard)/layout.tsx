@@ -5,6 +5,7 @@ import { RealtimeProvider } from "@/features/events/realtime-provider";
 import { KeyboardShortcuts } from "@/components/shared/keyboard-shortcuts";
 import { CommandPalette } from "@/components/shared/command-palette";
 import { CreateTaskDialog } from "@/features/tasks/components/create-task-dialog";
+import { AnalyticsProvider } from "@/components/shared/analytics-provider";
 
 export default async function DashboardLayout({
   children,
@@ -20,6 +21,7 @@ export default async function DashboardLayout({
 
   return (
     <RealtimeProvider>
+      <AnalyticsProvider userEmail={user.email ?? null} />
       <KeyboardShortcuts />
       <CommandPalette />
       <CreateTaskDialog />
