@@ -31,6 +31,8 @@ export const viewport: import("next").Viewport = {
   userScalable: false,
 };
 
+const DENSITY_BOOTSTRAP_SCRIPT = `(function(){try{var d=localStorage.getItem('urpe-density');if(d==='compact'||d==='comfortable')document.documentElement.dataset.density=d;}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,6 +43,11 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: DENSITY_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

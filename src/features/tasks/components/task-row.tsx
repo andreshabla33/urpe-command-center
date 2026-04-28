@@ -3,13 +3,14 @@ import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
 import { AgeBadge } from "./age-badge";
 import { SuggestionBadge } from "./suggestion-badge";
+import { QuickStatusMenu } from "./quick-status-menu";
 import type { TaskRow as TaskRowType } from "../queries";
 
 export function TaskRow({ task }: { task: TaskRowType }) {
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className="grid grid-cols-[60px_1fr_120px_180px_60px_60px_70px] items-center gap-3 border-b px-4 py-2.5 hover:bg-muted/40"
+      className="group/row grid grid-cols-[60px_1fr_120px_180px_60px_60px_70px_24px] items-center gap-3 border-b px-4 py-[var(--row-py,0.625rem)] hover:bg-muted/40"
     >
       <span className="font-mono text-[11px] text-muted-foreground truncate">
         {task.id}
@@ -26,6 +27,10 @@ export function TaskRow({ task }: { task: TaskRowType }) {
       ) : (
         <span aria-hidden />
       )}
+      <QuickStatusMenu
+        taskId={task.id ?? ""}
+        currentStatus={task.status ?? "backlog"}
+      />
     </Link>
   );
 }

@@ -187,14 +187,16 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 
 ---
 
-## Fase 7 — List enhancements (en progreso)
-
+## Fase 7 — List enhancements ✅
 - [x] **Search por texto** (input con shortcut `/`) — `?q=…`, ilike sobre title/description/id
 - [x] **Sort por columna** — click en header (ID, Status, Edad, Prio) toggle asc/desc, persistido en URL
 - [x] **Conteo por status en filtros** — `getStatusCounts()` agrega `(N)` al lado de cada option
 - [x] **Vista "Sin asignar"** — opción extra en filter Owner que matchea `owner_email IS NULL`
-- [ ] **Quick action en hover** — mini menú de status sin entrar al detail (diferido)
-- [ ] **Densidad compacta toggle** — localStorage + data attribute en `<html>` (diferido)
+- [x] **Quick action en hover** — `QuickStatusMenu` aparece on `group-hover/row`, dropdown con
+  los 6 status, click cambia status sin abrir detail (e.preventDefault + stopPropagation).
+- [x] **Densidad compacta toggle** — `DensityToggle` Client Component en sidebar.
+  CSS variable `--row-py` con override en `[data-density="compact"]`. Script inline
+  en root layout aplica `data-density` desde localStorage antes de hydrate (no flash).
 
 ---
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { signOut } from "@/features/auth/actions";
 import { PushToggle } from "@/features/push/push-toggle";
 import { OfflineIndicator } from "./offline-indicator";
+import { DensityToggle } from "./density-toggle";
 
 type SidebarProps = {
   userEmail: string;
@@ -47,6 +48,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
         <OfflineIndicator />
         <p className="mt-2 truncate text-muted-foreground">{userEmail}</p>
         <div className="mt-2 flex flex-col gap-1">
+          <DensityToggle />
           <PushToggle />
           <form action={signOut}>
             <button
