@@ -132,13 +132,14 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 - [ ] **Sync inverso** (opcional): Edge Function `calendar-poll` cada 30 min lee eventos del calendar, si tienen tag `[URPE]` los crea como `dim_task`.
 - [ ] **UI: botón "📅 Calendar" en task detail** — toggle link/unlink.
 
-### 5.3 GitHub webhook
-
-- [ ] **Webhook `/api/webhooks/github/route.ts`** — verifica HMAC con `GITHUB_WEBHOOK_SECRET`.
-- [ ] **Eventos manejados**: `push` (commits), `pull_request` (opened/merged), `issues` (linked).
-- [ ] **Parser**: regex `URPE-[A-Z]+-[A-Z0-9-]+` en commit message / PR title / issue body.
-- [ ] **Emit** `fact_event(comment)` con `metadata: { source: "github", commit_sha, url, message }`.
-- [ ] **Setup webhook** en `diegourquijo-personal/Urpeailab-command-center` y otros repos URPE.
+### 5.3 GitHub webhook ✅
+- [x] Webhook `/api/webhooks/github/route.ts` con HMAC SHA-256 verify.
+- [x] Eventos manejados: `push`, `pull_request`, `issues`, `ping`.
+- [x] Parser regex `URPE-[A-Z]+-[A-Z0-9-]+` (commit message, PR title+body, issue title+body).
+- [x] Filter a tasks existentes; emite `fact_event(comment)` con `metadata.source=github`.
+- [x] Idempotente vía constraint `fact_event_replay_unique`.
+- [x] Deploy en producción: `https://urpe-command-center.vercel.app/api/webhooks/github`.
+- [ ] Setup en GitHub (3 min, ver pasos abajo).
 
 ### 5.4 Kapso webhook (WhatsApp)
 
