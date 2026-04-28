@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { TaskFiltersSchema } from "@/features/tasks/schema";
 import { getKpis, getTasks, listOwners } from "@/features/tasks/queries";
 import { TaskRow } from "@/features/tasks/components/task-row";
+import { TaskListHeader } from "@/features/tasks/components/task-list-header";
 import { KpiStrip } from "@/components/shared/kpi-strip";
 import { TaskFilters } from "@/features/tasks/components/task-filters";
 import { MotionList } from "@/components/shared/motion-list";
@@ -50,11 +51,14 @@ export default async function HomePage({ searchParams }: PageProps) {
             Sin tareas que coincidan con los filtros.
           </p>
         ) : (
-          <MotionList>
-            {tasks.map((t) => (
-              <TaskRow key={t.id} task={t} />
-            ))}
-          </MotionList>
+          <>
+            <TaskListHeader />
+            <MotionList>
+              {tasks.map((t) => (
+                <TaskRow key={t.id} task={t} />
+              ))}
+            </MotionList>
+          </>
         )}
       </div>
     </main>
