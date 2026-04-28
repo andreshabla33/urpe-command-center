@@ -187,6 +187,31 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 
 ---
 
+## Fase 6 — Polish del plan original (en progreso)
+
+### 6.1 Vista de agentes IA (N18, Sofía, Mónica, Rocky) — pendiente
+Punto de la VISION del plan que estaba sin implementar.
+
+### 6.2 Métricas ingresos URPE IS — pendiente
+Bloqueado por decisión Diego sobre fuente de data.
+
+### 6.3 Framer Motion micro-animations ✅
+- [x] Lista de tasks con stagger fade-in (`MotionList`, 25ms entre rows, ease cubic-bezier)
+- [x] KPI strip con `CountUp` (animación 600ms ease-out)
+- [x] Sin animaciones decorativas — solo donde marca transiciones de estado.
+  Strategic minimalism del skill.
+
+### 6.4 Offline-first sync ✅
+- [x] IndexedDB queue (`lib/offline/queue.ts` con lib `idb`).
+- [x] Hook `useOnlineStatus` (escucha `online`/`offline` events).
+- [x] Sync worker `flushOfflineQueue` ejecuta Server Actions encoladas.
+- [x] Wrappers en Kanban: si offline → encolar; si online + falla → encolar; reintenta auto.
+- [x] `OfflineIndicator` en sidebar muestra "Sin conexión · N en cola" / "Sincronizando…".
+- [x] Auto-flush al volver online (efecto en mount + cuando `online` cambia).
+- No es Replicache full pero cubre el espíritu del plan (sync resiliente sin perder mutaciones).
+
+---
+
 ## Fase 4 — PWA + Push + analytics ✅
 - [x] Manifest + iconos + Serwist service worker
   - [x] `app/manifest.ts`, `app/icon.tsx`, `app/apple-icon.tsx` (auto-generados con ImageResponse)

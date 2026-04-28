@@ -4,6 +4,7 @@ import { getKpis, getTasks, listOwners } from "@/features/tasks/queries";
 import { TaskRow } from "@/features/tasks/components/task-row";
 import { KpiStrip } from "@/components/shared/kpi-strip";
 import { TaskFilters } from "@/features/tasks/components/task-filters";
+import { MotionList } from "@/components/shared/motion-list";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -49,7 +50,11 @@ export default async function HomePage({ searchParams }: PageProps) {
             Sin tareas que coincidan con los filtros.
           </p>
         ) : (
-          tasks.map((t) => <TaskRow key={t.id} task={t} />)
+          <MotionList>
+            {tasks.map((t) => (
+              <TaskRow key={t.id} task={t} />
+            ))}
+          </MotionList>
         )}
       </div>
     </main>

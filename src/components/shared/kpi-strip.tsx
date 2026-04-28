@@ -1,7 +1,8 @@
 import type { TaskKpis } from "@/features/tasks/queries";
+import { CountUp } from "./count-up";
 
 export function KpiStrip({ kpis }: { kpis: TaskKpis }) {
-  const cards = [
+  const cards: Array<{ label: string; value: number | string; danger?: boolean }> = [
     { label: "Abiertas", value: kpis.open },
     { label: "Atascadas >7d", value: kpis.stuck, danger: kpis.stuck > 0 },
     { label: "P0 activas", value: kpis.p0_active, danger: kpis.p0_active > 0 },
@@ -27,7 +28,7 @@ export function KpiStrip({ kpis }: { kpis: TaskKpis }) {
               (c.danger ? "text-destructive" : "")
             }
           >
-            {c.value}
+            <CountUp value={c.value} />
           </p>
         </div>
       ))}

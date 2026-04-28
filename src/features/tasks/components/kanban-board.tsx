@@ -8,6 +8,7 @@ import { PriorityBadge } from "./priority-badge";
 import { AgeBadge } from "./age-badge";
 import type { TaskRow } from "../queries";
 import type { TaskStatus } from "../types";
+import { enqueueMutation } from "@/lib/offline/queue";
 
 const COLUMNS: { id: TaskStatus; label: string }[] = [
   { id: "backlog", label: "Backlog" },
@@ -38,9 +39,20 @@ export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
 
     startTransition(async () => {
       applyOptimistic({ taskId, status });
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await enqueueMutation({
+          type: "setTaskStatus",
+          payload: { taskId, status },
+        });
+        return;
+      }
       const res = await setTaskStatus({ taskId, status });
       if (!res.ok) {
-        console.error("setTaskStatus failed:", res.error);
+        await enqueueMutation({
+          type: "setTaskStatus",
+          payload: { taskId, status },
+        });
+        console.error("setTaskStatus failed, queued:", res.error);
       }
     });
   }

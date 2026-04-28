@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/features/auth/actions";
 import { PushToggle } from "@/features/push/push-toggle";
+import { OfflineIndicator } from "./offline-indicator";
 
 type SidebarProps = {
   userEmail: string;
@@ -43,7 +44,8 @@ export function Sidebar({ userEmail }: SidebarProps) {
       </nav>
 
       <div className="border-t px-5 py-3 text-xs">
-        <p className="truncate text-muted-foreground">{userEmail}</p>
+        <OfflineIndicator />
+        <p className="mt-2 truncate text-muted-foreground">{userEmail}</p>
         <div className="mt-2 flex flex-col gap-1">
           <PushToggle />
           <form action={signOut}>
