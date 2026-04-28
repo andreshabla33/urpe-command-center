@@ -9,6 +9,11 @@ export type PaletteTask = {
   owner_email: string | null;
 };
 
+export type PalettePerson = {
+  email: string;
+  full_name: string | null;
+};
+
 export async function listTasksForPalette(): Promise<PaletteTask[]> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -20,4 +25,14 @@ export async function listTasksForPalette(): Promise<PaletteTask[]> {
     (t): t is PaletteTask =>
       t.id != null && t.title != null && t.status != null,
   );
+}
+
+export async function listActivePersons(): Promise<PalettePerson[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("dim_person")
+    .select("email, full_name")
+    .eq("is_active", true)
+    .order("full_name");
+  return data ?? [];
 }

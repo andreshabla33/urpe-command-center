@@ -7,6 +7,13 @@ import { PriorityBadge } from "@/features/tasks/components/priority-badge";
 import { AgeBadge } from "@/features/tasks/components/age-badge";
 import { SuggestionBadge } from "@/features/tasks/components/suggestion-badge";
 import { TaskActions } from "@/features/tasks/components/task-actions";
+import {
+  getTaskEmails,
+  isGmailConnected,
+} from "@/features/integrations/gmail/queries";
+import { EmailThread } from "@/features/integrations/gmail/components/email-thread";
+import { ReplyForm } from "@/features/integrations/gmail/components/reply-form";
+import { createClient } from "@/lib/supabase/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -37,7 +44,17 @@ export default async function TaskDetailPage({ params }: Props) {
   const task = await getTask(id);
   if (!task) notFound();
 
-  const events = await getTaskEvents(id);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userEmail = user?.email ?? "";
+
+  const [events, emails, gmailConnected] = await Promise.all([
+    getTaskEvents(id),
+    getTaskEmails(id),
+    userEmail ? isGmailConnected(userEmail) : Promise.resolve(false),
+  ]);
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
@@ -99,13 +116,33 @@ export default async function TaskDetailPage({ params }: Props) {
           </ol>
         </section>
 
-        <aside className="w-72 shrink-0 border-l p-4">
+        <aside className="w-80 shrink-0 border-l overflow-y-auto p-4">
           <h3 className="text-xs uppercase tracking-widest text-muted-foreground">
             Acciones
           </h3>
           <div className="mt-3">
             <TaskActions taskId={task.id ?? id} />
           </div>
+
+          <h3 className="mt-6 text-xs uppercase tracking-widest text-muted-foreground">
+            Email thread ({emails.length})
+          </h3>
+          <div className="mt-3">
+            <EmailThread emails={emails} />
+          </div>
+          {gmailConnected && emails.length > 0 && (
+            <div className="mt-4">
+              <ReplyForm taskId={task.id ?? id} />
+            </div>
+          )}
+          {!gmailConnected && (
+            <a
+              href="/auth/google-integrations/start?provider=gmail"
+              className="mt-4 inline-block text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              Conectar Gmail →
+            </a>
+          )}
 
           <div className="mt-6 space-y-2 text-xs">
             <div>

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { RealtimeProvider } from "@/features/events/realtime-provider";
 import { KeyboardShortcuts } from "@/components/shared/keyboard-shortcuts";
 import { CommandPalette } from "@/components/shared/command-palette";
+import { CreateTaskDialog } from "@/features/tasks/components/create-task-dialog";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
     <RealtimeProvider>
       <KeyboardShortcuts />
       <CommandPalette />
+      <CreateTaskDialog />
       <div className="flex flex-1">
         <Sidebar userEmail={user.email ?? "—"} />
         <div className="flex flex-1 flex-col overflow-hidden">{children}</div>

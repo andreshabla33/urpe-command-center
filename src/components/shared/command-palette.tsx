@@ -16,6 +16,7 @@ import {
   type PaletteTask,
 } from "@/features/tasks/palette-actions";
 import { parseNlCommand } from "@/features/ai/nl-actions";
+import { CREATE_TASK_EVENT } from "@/features/tasks/components/create-task-dialog";
 
 const NAV = [
   { href: "/", label: "Lista", shortcut: "g+l" },
@@ -116,6 +117,23 @@ export function CommandPalette() {
             <p className="px-3 pb-2 text-xs text-muted-foreground">{aiHint}</p>
           )}
         </CommandEmpty>
+
+        <CommandGroup heading="Acciones">
+          <CommandItem
+            value="nueva tarea crear"
+            onSelect={() => {
+              close();
+              window.dispatchEvent(new CustomEvent(CREATE_TASK_EVENT));
+            }}
+          >
+            <span>Nueva tarea</span>
+            <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+              c
+            </span>
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
 
         <CommandGroup heading="Navegación">
           {NAV.map((n) => (

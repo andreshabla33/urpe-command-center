@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { CREATE_TASK_EVENT } from "@/features/tasks/components/create-task-dialog";
 
 const LEADER_TIMEOUT_MS = 1500;
 
@@ -52,6 +53,12 @@ export function KeyboardShortcuts() {
       if (e.key.toLowerCase() === "g") {
         leaderActive = true;
         leaderTimer = setTimeout(clearLeader, LEADER_TIMEOUT_MS);
+        return;
+      }
+
+      if (e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent(CREATE_TASK_EVENT));
         return;
       }
     }

@@ -10,6 +10,11 @@ const ServerEnvSchema = z.object({
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
   VAPID_SUBJECT: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
+  GOOGLE_OAUTH_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
+  GMAIL_PUBSUB_TOPIC: z.string().min(1).optional(),
+  GMAIL_PUBSUB_VERIFICATION_TOKEN: z.string().min(1).optional(),
+  GITHUB_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 export const serverEnv = ServerEnvSchema.parse({
@@ -21,4 +26,9 @@ export const serverEnv = ServerEnvSchema.parse({
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_SUBJECT: process.env.VAPID_SUBJECT,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
+  GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
+  GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+  GMAIL_PUBSUB_TOPIC: process.env.GMAIL_PUBSUB_TOPIC,
+  GMAIL_PUBSUB_VERIFICATION_TOKEN: process.env.GMAIL_PUBSUB_VERIFICATION_TOKEN,
+  GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
 });

@@ -5,7 +5,7 @@
 
 ## Estado actual
 
-**Progreso**: Fases 0, 1, 2, 3, 4 completadas. **MVP listo.**
+**Progreso**: Fases 0-4 completadas (MVP listo y deployado en Vercel). **Fase 5 (integraciones) en progreso.**
 
 | Métrica | Valor |
 |---|---|
@@ -97,6 +97,85 @@
 - [x] Botón ping → emite `fact_event(ping)` desde la UI (Server Action `pingTask`)
 - [x] Task detail page `/tasks/[id]` con timeline de eventos + sidebar de acciones
 - [x] UI: `SuggestionBadge` inline en lista de tareas
+
+## Fase 5 — Integraciones externas (en progreso)
+
+> Cierra los criterios de éxito 2 y 5 del plan original (`docs/plan-del-proyecto.md`):
+> "ver lista de TODAS las tareas (50+)" y "click en tarea → thread Gmail completo".
+> Cada integración es un **vertical slice** en `src/features/integrations/<source>/` y un
+> webhook handler en `src/app/api/webhooks/<source>/route.ts`.
+
+### 5.1 Gmail (CRÍTICO — desbloquea criterio #5 del plan)
+
+Estrategia: Diego (admin) conecta **su propia cuenta Gmail** una sola vez via OAuth dedicado.
+El refresh token vive en `dim_person_integration`, encriptado en Vault. Los demás del equipo
+no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email`.
+
+- [ ] **Migration `gmail_integration`** — tabla `dim_person_integration(email, provider, refresh_token_secret_id, scopes, watch_history_id, watch_expires_at)`. Refresh token guardado en Vault; la fila guarda solo el secret id.
+- [ ] **OAuth flow Gmail** — `/auth/gmail/start` y `/auth/gmail/callback` con scopes `gmail.readonly`, `gmail.send`, `gmail.modify`. Solo Diego (rol admin) puede ejecutarlo.
+- [ ] **Gmail watch setup** — Edge Function `gmail-watch-renew` que llama `users.watch` cada 6 días (Google expira los watches a 7 días). Cron diario.
+- [ ] **Pub/Sub topic + subscription** — topic `urpe-gmail-events` en Google Cloud, subscription tipo `push` apuntando a `https://urpe-command-center.vercel.app/api/webhooks/gmail`.
+- [ ] **Webhook `/api/webhooks/gmail/route.ts`** — valida JWT del token Pub/Sub, decodifica `data` (history_id), llama Gmail API con refresh_token, fetcha mensajes nuevos, parsea, escribe `fact_email` + `fact_event(email_received|email_sent)`.
+- [ ] **Vinculación email ↔ task** — heurística:
+  1. Si subject contiene `[URPE-XXX-NNN]` → match exacto a `dim_task.id`.
+  2. Si `thread_id` ya existe en `fact_email` → mismo `task_id`.
+  3. LLM gpt-5.2 con prompt "extrae task_id si lo hay" sobre subject + body (fallback).
+- [ ] **Outbox pattern** — tabla `outbox_event` para retries idempotentes si Pub/Sub falla.
+- [ ] **UI: thread panel en `/tasks/[id]`** — query `getTaskEmails(taskId)` + componente `EmailThread` que renderiza inbound/outbound como timeline. (Sin iframe Gmail — más limpio renderizar nuestro propio HTML).
+- [ ] **Server Action `replyToTask(taskId, body)`** — usa Gmail API `users.messages.send` con `threadId` para responder dentro del thread; emite `fact_event(email_sent)`.
+- [ ] **UI: textarea + botón Reply** en task detail con keyboard shortcut `r`.
+
+### 5.2 Google Calendar
+
+- [ ] **Migration `calendar_integration`** — agregar columnas a `dim_person_integration` para Calendar (mismo flow OAuth, scope `calendar.events`).
+- [ ] **Server Action `linkTaskToCalendar(taskId)`** — crea event en Calendar de Diego con due_date, guarda `metadata.calendar_event_id`.
+- [ ] **Sync inverso** (opcional): Edge Function `calendar-poll` cada 30 min lee eventos del calendar, si tienen tag `[URPE]` los crea como `dim_task`.
+- [ ] **UI: botón "📅 Calendar" en task detail** — toggle link/unlink.
+
+### 5.3 GitHub webhook
+
+- [ ] **Webhook `/api/webhooks/github/route.ts`** — verifica HMAC con `GITHUB_WEBHOOK_SECRET`.
+- [ ] **Eventos manejados**: `push` (commits), `pull_request` (opened/merged), `issues` (linked).
+- [ ] **Parser**: regex `URPE-[A-Z]+-[A-Z0-9-]+` en commit message / PR title / issue body.
+- [ ] **Emit** `fact_event(comment)` con `metadata: { source: "github", commit_sha, url, message }`.
+- [ ] **Setup webhook** en `diegourquijo-personal/Urpeailab-command-center` y otros repos URPE.
+
+### 5.4 Kapso webhook (WhatsApp)
+
+- [ ] **Webhook `/api/webhooks/kapso/route.ts`** — verifica `X-Kapso-Signature` con shared secret.
+- [ ] **Mapping número → owner_email**: lookup en `wp_team_humano.telefono` (normalizado).
+- [ ] **Emit** `fact_event(comment)` con `metadata: { source: "kapso", phone, message }`.
+- [ ] **Vinculación a task**: por convención el primer mensaje del agente debe contener `URPE-XXX-NNN`; si no, queda como evento huérfano (visible en feed global pero sin task).
+
+### 5.5 Observabilidad (Sentry + PostHog)
+
+- [ ] **Sentry**: `@sentry/nextjs` con DSN en env, captura errores de Server Actions, Edge Functions, route handlers.
+- [ ] **PostHog**: `posthog-js` (browser) + `posthog-node` (server). Track: page views, task actions (status change, ping, categorize), AI suggestion impressions/clicks.
+- [ ] Dashboard PostHog con embudos (login → first task open → first action) y heatmap de uso.
+
+### 5.6 Crear tarea desde UI ✅
+- [x] **Server Action `createTask(input)`** — Zod input + insert `dim_task` + emit `fact_event(created)`.
+- [x] **Form en Cmd+K** — comando "Nueva tarea" en palette + dialog con shadcn primitives.
+- [x] **Keyboard shortcut `c`** — abre el modal directo (event-bus pattern).
+- [ ] Auto-categorize on submit (gpt-5.2 sugerir `project_id` y `priority`) — pendiente, opcional.
+
+### Bloqueantes externos
+
+- Diego conecta su Gmail vía OAuth (5.1) → genera refresh_token persistente.
+- DNS verificado para Pub/Sub (ya hay para Resend, posiblemente sirve).
+- Webhook secrets: `GMAIL_PUBSUB_VERIFICATION_TOKEN`, `GITHUB_WEBHOOK_SECRET`, `KAPSO_WEBHOOK_SECRET`.
+- Sentry DSN + PostHog project key.
+
+### Orden sugerido de ataque
+
+1. **5.6** (Crear tarea desde UI) — sin dependencias externas, alto valor inmediato. ~30 min.
+2. **5.1** (Gmail) — cierra criterio #5 del plan, el más impactante. ~3-4h.
+3. **5.3** (GitHub webhook) — simple, mejora trazabilidad. ~1h.
+4. **5.2** (Calendar) — útil pero depende de 5.1 estar funcionando. ~2h.
+5. **5.4** (Kapso) — depende de info de Kapso (signature spec, formato del payload). ~1h.
+6. **5.5** (Sentry + PostHog) — para cuando haya tráfico real. ~30 min.
+
+---
 
 ## Fase 4 — PWA + Push + analytics ✅
 - [x] Manifest + iconos + Serwist service worker

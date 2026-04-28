@@ -845,6 +845,50 @@ export type Database = {
         }
         Relationships: []
       }
+      dim_person_integration: {
+        Row: {
+          created_at: string
+          email: string
+          metadata: Json
+          provider: string
+          scopes: string[]
+          updated_at: string
+          vault_secret_id: string
+          watch_expires_at: string | null
+          watch_history_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          metadata?: Json
+          provider: string
+          scopes?: string[]
+          updated_at?: string
+          vault_secret_id: string
+          watch_expires_at?: string | null
+          watch_history_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          metadata?: Json
+          provider?: string
+          scopes?: string[]
+          updated_at?: string
+          vault_secret_id?: string
+          watch_expires_at?: string | null
+          watch_history_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dim_person_integration_email_fkey"
+            columns: ["email"]
+            isOneToOne: false
+            referencedRelation: "dim_person"
+            referencedColumns: ["email"]
+          },
+        ]
+      }
       dim_project: {
         Row: {
           color: string | null
@@ -9975,6 +10019,19 @@ export type Database = {
       update_enrollment_after_send: {
         Args: { p_enrollment_id: number; p_success?: boolean }
         Returns: boolean
+      }
+      urpe_vault_create_secret: {
+        Args: {
+          secret_description?: string
+          secret_name: string
+          secret_value: string
+        }
+        Returns: string
+      }
+      urpe_vault_read_secret: { Args: { secret_id: string }; Returns: string }
+      urpe_vault_update_secret: {
+        Args: { new_value: string; secret_id: string }
+        Returns: undefined
       }
     }
     Enums: {
