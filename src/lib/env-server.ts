@@ -15,6 +15,7 @@ const ServerEnvSchema = z.object({
   GMAIL_PUBSUB_TOPIC: z.string().min(1).optional(),
   GMAIL_PUBSUB_VERIFICATION_TOKEN: z.string().min(1).optional(),
   GITHUB_WEBHOOK_SECRET: z.string().min(1).optional(),
+  KAPSO_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 export const serverEnv = ServerEnvSchema.parse({
@@ -31,4 +32,5 @@ export const serverEnv = ServerEnvSchema.parse({
   GMAIL_PUBSUB_TOPIC: process.env.GMAIL_PUBSUB_TOPIC,
   GMAIL_PUBSUB_VERIFICATION_TOKEN: process.env.GMAIL_PUBSUB_VERIFICATION_TOKEN,
   GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
+  KAPSO_WEBHOOK_SECRET: process.env.KAPSO_WEBHOOK_SECRET,
 });
