@@ -125,12 +125,16 @@ no necesitan conectar — solo Diego es el remitente/destinatario en `fact_email
 - [ ] **Server Action `replyToTask(taskId, body)`** — usa Gmail API `users.messages.send` con `threadId` para responder dentro del thread; emite `fact_event(email_sent)`.
 - [ ] **UI: textarea + botón Reply** en task detail con keyboard shortcut `r`.
 
-### 5.2 Google Calendar
-
-- [ ] **Migration `calendar_integration`** — agregar columnas a `dim_person_integration` para Calendar (mismo flow OAuth, scope `calendar.events`).
-- [ ] **Server Action `linkTaskToCalendar(taskId)`** — crea event en Calendar de Diego con due_date, guarda `metadata.calendar_event_id`.
-- [ ] **Sync inverso** (opcional): Edge Function `calendar-poll` cada 30 min lee eventos del calendar, si tienen tag `[URPE]` los crea como `dim_task`.
-- [ ] **UI: botón "📅 Calendar" en task detail** — toggle link/unlink.
+### 5.2 Google Calendar ✅
+- [x] Reusa `dim_person_integration` (provider='calendar') + Vault refresh token.
+- [x] OAuth flow soporta `?provider=calendar` (mismo `/auth/google-integrations/{start,callback}`).
+- [x] `lib/google/calendar.ts` cliente API (createEvent, deleteEvent).
+- [x] Server Actions `linkTaskToCalendar` / `unlinkTaskFromCalendar`.
+- [x] Idempotente: chequea `metadata.calendar_event_id` antes de crear; tolera 404/410 al borrar.
+- [x] UI: `CalendarLinkButton` en task detail (link/unlink toggle, disabled sin due_date).
+- [x] Emit `fact_event(comment)` con `metadata.source=calendar` (kind: linked/unlinked).
+- [x] Tracking PostHog `task_calendar_linked`.
+- [ ] Sync inverso (poll Calendar→tasks) — diferido, no necesario para MVP.
 
 ### 5.3 GitHub webhook ✅
 - [x] Webhook `/api/webhooks/github/route.ts` con HMAC SHA-256 verify.

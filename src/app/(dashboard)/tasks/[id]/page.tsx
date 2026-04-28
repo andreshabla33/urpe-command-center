@@ -13,6 +13,8 @@ import {
 } from "@/features/integrations/gmail/queries";
 import { EmailThread } from "@/features/integrations/gmail/components/email-thread";
 import { ReplyForm } from "@/features/integrations/gmail/components/reply-form";
+import { isCalendarConnected } from "@/features/integrations/calendar/queries";
+import { CalendarLinkButton } from "@/features/integrations/calendar/components/calendar-link-button";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = {
@@ -50,11 +52,22 @@ export default async function TaskDetailPage({ params }: Props) {
   } = await supabase.auth.getUser();
   const userEmail = user?.email ?? "";
 
-  const [events, emails, gmailConnected] = await Promise.all([
+  const [events, emails, gmailConnected, calendarConnected] = await Promise.all([
     getTaskEvents(id),
     getTaskEmails(id),
     userEmail ? isGmailConnected(userEmail) : Promise.resolve(false),
+    userEmail ? isCalendarConnected(userEmail) : Promise.resolve(false),
   ]);
+
+  const taskMetadata = (task.metadata as Record<string, unknown> | null) ?? {};
+  const calendarEventId =
+    typeof taskMetadata.calendar_event_id === "string"
+      ? taskMetadata.calendar_event_id
+      : null;
+  const calendarHtmlLink =
+    typeof taskMetadata.calendar_html_link === "string"
+      ? taskMetadata.calendar_html_link
+      : null;
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
@@ -120,8 +133,23 @@ export default async function TaskDetailPage({ params }: Props) {
           <h3 className="text-xs uppercase tracking-widest text-muted-foreground">
             Acciones
           </h3>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-col gap-2">
             <TaskActions taskId={task.id ?? id} />
+            {calendarConnected ? (
+              <CalendarLinkButton
+                taskId={task.id ?? id}
+                hasDueDate={!!task.due_date}
+                initialEventId={calendarEventId}
+                initialHtmlLink={calendarHtmlLink}
+              />
+            ) : (
+              <a
+                href="/auth/google-integrations/start?provider=calendar"
+                className="text-[11px] text-muted-foreground hover:text-foreground"
+              >
+                Conectar Calendar →
+              </a>
+            )}
           </div>
 
           <h3 className="mt-6 text-xs uppercase tracking-widest text-muted-foreground">
