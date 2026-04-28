@@ -30,10 +30,17 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const path = request.nextUrl.pathname;
   const isPublicPath =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/auth") ||
-    request.nextUrl.pathname.startsWith("/api/webhooks");
+    path.startsWith("/login") ||
+    path.startsWith("/auth") ||
+    path.startsWith("/api/webhooks") ||
+    path === "/manifest.webmanifest" ||
+    path === "/icon" ||
+    path === "/apple-icon" ||
+    path === "/favicon.ico" ||
+    path.startsWith("/sw.js") ||
+    path.startsWith("/workbox");
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
