@@ -10,7 +10,8 @@ export function TaskRow({ task }: { task: TaskRowType }) {
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className="group/row grid grid-cols-[60px_1fr_120px_180px_60px_60px_70px_24px] items-center gap-3 border-b px-4 py-[var(--row-py)] hover:bg-muted/40"
+      data-task-row
+      className="group/row grid grid-cols-[60px_1fr_120px_180px_60px_60px_70px_24px] items-center gap-3 border-b px-4 py-2.5 hover:bg-muted/40"
     >
       <span className="font-mono text-[11px] text-muted-foreground truncate">
         {task.id}

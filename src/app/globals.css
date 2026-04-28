@@ -5,7 +5,6 @@
 
 :root {
   --radius: 0.625rem;
-  --row-py: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -120,7 +119,8 @@
   body {
     @apply bg-background text-foreground;
   }
-  html[data-density="compact"] {
-    --row-py: 0.25rem;
+  html[data-density="compact"] [data-task-row] {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 }
