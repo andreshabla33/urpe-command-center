@@ -110,6 +110,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --row-py: 0.625rem;
 }
 
 @layer base {
@@ -119,8 +120,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  html[data-density="compact"] [data-task-row] {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+  html[data-density="compact"] {
+    --row-py: 0.25rem;
   }
 }
