@@ -71,13 +71,13 @@ export default async function TaskDetailPage({ params }: Props) {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b px-6 pt-6 pb-4">
+      <header className="border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
         <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">
           ← Lista
         </Link>
-        <div className="mt-2 flex items-baseline gap-3">
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-mono text-xs text-muted-foreground">{task.id}</span>
-          <h1 className="text-lg font-semibold tracking-tight">{task.title}</h1>
+          <h1 className="text-base sm:text-lg font-semibold tracking-tight">{task.title}</h1>
         </div>
         <div className="mt-2 flex items-center gap-2">
           <StatusBadge status={task.status ?? "backlog"} />
@@ -87,8 +87,8 @@ export default async function TaskDetailPage({ params }: Props) {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <section className="flex-1 overflow-y-auto px-6 py-5">
+      <div className="flex flex-1 flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+        <section className="flex-1 md:overflow-y-auto px-4 sm:px-6 py-5">
           {task.description && (
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {task.description}
@@ -129,7 +129,7 @@ export default async function TaskDetailPage({ params }: Props) {
           </ol>
         </section>
 
-        <aside className="w-80 shrink-0 border-l overflow-y-auto p-4">
+        <aside className="w-full md:w-80 shrink-0 border-t md:border-t-0 md:border-l md:overflow-y-auto p-4">
           <h3 className="text-xs uppercase tracking-widest text-muted-foreground">
             Acciones
           </h3>

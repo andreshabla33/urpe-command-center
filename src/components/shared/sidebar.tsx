@@ -8,17 +8,20 @@ type SidebarProps = {
   userEmail: string;
 };
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/", label: "Lista", shortcut: "g+l" },
   { href: "/kanban", label: "Kanban", shortcut: "g+k" },
   { href: "/calendar", label: "Calendario", shortcut: "g+c" },
   { href: "/graph", label: "Grafo", shortcut: "g+g" },
   { href: "/analytics", label: "Analytics", shortcut: "g+a" },
-];
+] as const;
 
-export function Sidebar({ userEmail }: SidebarProps) {
+export function SidebarContent({
+  userEmail,
+  onNavigate,
+}: SidebarProps & { onNavigate?: () => void }) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+    <>
       <div className="border-b px-5 py-4">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           URPE
@@ -32,6 +35,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
             <li key={item.href}>
               <Link
                 href={item.href}
+                onClick={onNavigate}
                 className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
                 <span>{item.label}</span>
@@ -60,6 +64,14 @@ export function Sidebar({ userEmail }: SidebarProps) {
           </form>
         </div>
       </div>
+    </>
+  );
+}
+
+export function Sidebar({ userEmail }: SidebarProps) {
+  return (
+    <aside className="hidden md:flex w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+      <SidebarContent userEmail={userEmail} />
     </aside>
   );
 }

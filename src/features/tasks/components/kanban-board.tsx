@@ -73,7 +73,7 @@ export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex h-full gap-3 overflow-x-auto px-6 py-4">
+      <div className="flex h-full gap-3 overflow-x-auto px-4 sm:px-6 py-3 sm:py-4">
         {COLUMNS.map((col) => (
           <Droppable droppableId={col.id} key={col.id}>
             {(provided, snapshot) => (
@@ -81,7 +81,7 @@ export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={
-                  "flex w-72 shrink-0 flex-col rounded-md border bg-card " +
+                  "flex w-64 sm:w-72 shrink-0 flex-col rounded-md border bg-card " +
                   (snapshot.isDraggingOver ? "border-primary" : "border-border")
                 }
               >

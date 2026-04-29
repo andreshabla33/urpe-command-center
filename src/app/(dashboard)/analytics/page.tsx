@@ -16,8 +16,8 @@ export default async function AnalyticsPage() {
 
   return (
     <main className="flex flex-1 flex-col overflow-y-auto">
-      <header className="border-b px-6 pt-6 pb-4">
-        <h1 className="text-lg font-semibold tracking-tight">Analytics</h1>
+      <header className="border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+        <h1 className="text-base sm:text-lg font-semibold tracking-tight">Analytics</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">
           Burn-down · saturación · resumen ejecutivo diario (Claude Opus 4.7)
         </p>
@@ -25,7 +25,7 @@ export default async function AnalyticsPage() {
 
       {summary && (
         <section className="border-b">
-          <div className="flex items-baseline justify-between border-b px-6 pt-5 pb-2">
+          <div className="flex items-baseline justify-between border-b px-4 sm:px-6 pt-5 pb-2">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Resumen ejecutivo · {summary.date_key}
             </p>
@@ -34,14 +34,14 @@ export default async function AnalyticsPage() {
               {summary.email_sent_at ? " · email enviado" : " · sin email"}
             </p>
           </div>
-          <pre className="whitespace-pre-wrap px-6 py-4 font-sans text-sm leading-relaxed">
+          <pre className="whitespace-pre-wrap px-4 sm:px-6 py-4 font-sans text-sm leading-relaxed">
             {summary.content_md}
           </pre>
         </section>
       )}
 
       <section className="border-b">
-        <div className="px-6 pt-5 pb-2">
+        <div className="px-4 sm:px-6 pt-5 pb-2">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
             Burn-down (tareas abiertas por día, últimos 30)
           </p>
@@ -50,7 +50,7 @@ export default async function AnalyticsPage() {
       </section>
 
       <section>
-        <div className="border-b px-6 pt-5 pb-2">
+        <div className="border-b px-4 sm:px-6 pt-5 pb-2">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
             Saturación por persona (tareas activas)
           </p>

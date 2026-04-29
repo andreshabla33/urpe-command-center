@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shared/sidebar";
+import { MobileNav } from "@/components/shared/mobile-nav";
 import { createClient } from "@/lib/supabase/server";
 import { RealtimeProvider } from "@/features/events/realtime-provider";
 import { KeyboardShortcuts } from "@/components/shared/keyboard-shortcuts";
@@ -25,9 +26,12 @@ export default async function DashboardLayout({
       <KeyboardShortcuts />
       <CommandPalette />
       <CreateTaskDialog />
-      <div className="flex flex-1">
+      <div className="flex flex-1 flex-col md:flex-row">
+        <MobileNav userEmail={user.email ?? "—"} />
         <Sidebar userEmail={user.email ?? "—"} />
-        <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          {children}
+        </div>
       </div>
     </RealtimeProvider>
   );

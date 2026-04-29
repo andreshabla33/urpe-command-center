@@ -45,9 +45,9 @@ export default async function CalendarPage({ searchParams }: Props) {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <header className="flex items-center justify-between border-b px-6 pt-6 pb-4">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">
+          <h1 className="text-base sm:text-lg font-semibold tracking-tight capitalize">
             {format(cursor, "MMMM yyyy")}
           </h1>
           <p className="mt-0.5 text-xs text-muted-foreground">

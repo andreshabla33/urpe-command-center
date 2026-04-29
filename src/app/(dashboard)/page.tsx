@@ -37,8 +37,8 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b px-6 pt-6 pb-4">
-        <h1 className="text-lg font-semibold tracking-tight">Tareas</h1>
+      <header className="border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+        <h1 className="text-base sm:text-lg font-semibold tracking-tight">Tareas</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {tasks.length} {tasks.length === 1 ? "tarea" : "tareas"} · vista lista
         </p>
@@ -48,7 +48,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <KpiStrip kpis={kpis} />
       </div>
 
-      <div className="border-b px-6 py-3">
+      <div className="border-b px-4 sm:px-6 py-3 overflow-x-auto">
         <Suspense fallback={null}>
           <TaskFilters
             owners={owners}
@@ -58,20 +58,20 @@ export default async function HomePage({ searchParams }: PageProps) {
         </Suspense>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-auto">
         {tasks.length === 0 ? (
-          <p className="px-6 py-12 text-center text-sm text-muted-foreground">
+          <p className="px-4 sm:px-6 py-12 text-center text-sm text-muted-foreground">
             Sin tareas que coincidan con los filtros.
           </p>
         ) : (
-          <>
+          <div className="min-w-[760px]">
             <TaskListHeader sort={filters.sort} dir={filters.dir} />
             <MotionList>
               {tasks.map((t) => (
                 <TaskRow key={t.id} task={t} />
               ))}
             </MotionList>
-          </>
+          </div>
         )}
       </div>
     </main>
