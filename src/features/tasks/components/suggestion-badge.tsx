@@ -2,12 +2,12 @@ import { cn } from "@/lib/utils";
 import type { AiSuggestion } from "../queries";
 
 const ACTION_TONE: Record<string, string> = {
-  ping: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
-  escalate: "bg-red-500/15 text-red-600 dark:text-red-400",
-  reassign: "bg-purple-500/15 text-purple-700 dark:text-purple-400",
-  split: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400",
-  close: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-  wait: "bg-muted text-muted-foreground",
+  ping: "bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:text-blue-300 dark:bg-blue-500/15",
+  escalate: "bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300 dark:bg-rose-500/15",
+  reassign: "bg-violet-500/10 text-violet-700 ring-violet-500/20 dark:text-violet-300 dark:bg-violet-500/15",
+  split: "bg-cyan-500/10 text-cyan-700 ring-cyan-500/20 dark:text-cyan-300 dark:bg-cyan-500/15",
+  close: "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300 dark:bg-emerald-500/15",
+  wait: "bg-muted/60 text-muted-foreground ring-border",
 };
 
 export function SuggestionBadge({ suggestion }: { suggestion: AiSuggestion }) {
@@ -16,12 +16,15 @@ export function SuggestionBadge({ suggestion }: { suggestion: AiSuggestion }) {
     <span
       title={`${suggestion.reason} (${Math.round(suggestion.confidence * 100)}%)`}
       className={cn(
-        "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tabular-nums",
+        "relative inline-flex items-center gap-1 overflow-hidden rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tabular-nums ring-1 ring-inset",
         tone,
       )}
     >
-      <span aria-hidden>·</span>
-      {suggestion.action}
+      <span className="ai-shimmer pointer-events-none absolute inset-0" aria-hidden />
+      <span className="relative" aria-hidden>
+        ✦
+      </span>
+      <span className="relative">{suggestion.action}</span>
     </span>
   );
 }

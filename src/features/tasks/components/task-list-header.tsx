@@ -40,7 +40,7 @@ export function TaskListHeader({ sort, dir }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-[60px_1fr_120px_180px_110px_60px_70px_24px] items-center gap-3 border-b bg-muted/30 px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+    <div className="grid grid-cols-[60px_1fr_180px_180px_110px_60px_70px_24px] items-center gap-3 border-b bg-muted/30 px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground">
       {COLUMNS.map((c) => {
         const isActive = c.field && c.field === sort;
         const arrow = isActive ? (dir === "asc" ? " ↑" : " ↓") : "";

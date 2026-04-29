@@ -137,6 +137,31 @@ export type TaskKpis = {
   avg_response_hours: number | null;
 };
 
+export type DailyPoint = { day: string; count: number };
+
+export async function getActivityTrend(days = 14): Promise<DailyPoint[]> {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - days * 86_400_000);
+  since.setUTCHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from("fact_event")
+    .select("timestamp")
+    .gte("timestamp", since.toISOString());
+  if (error) throw error;
+
+  const buckets = new Map<string, number>();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(since.getTime() + i * 86_400_000);
+    buckets.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const row of data ?? []) {
+    const key = row.timestamp.slice(0, 10);
+    if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
+  }
+  return Array.from(buckets.entries()).map(([day, count]) => ({ day, count }));
+}
+
 export async function getKpis(): Promise<TaskKpis> {
   const supabase = await createClient();
 

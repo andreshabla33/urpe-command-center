@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { TaskFiltersSchema } from "@/features/tasks/schema";
 import {
+  getActivityTrend,
   getKpis,
   getStatusCounts,
   getTasks,
@@ -29,11 +30,12 @@ export default async function HomePage({ searchParams }: PageProps) {
     dir: raw.dir,
   });
 
-  const [kpis, tasks, owners, statusCounts] = await Promise.all([
+  const [kpis, tasks, owners, statusCounts, trend] = await Promise.all([
     getKpis(),
     getTasks(filters),
     listOwners(),
     getStatusCounts(),
+    getActivityTrend(14),
   ]);
 
   return (
@@ -49,7 +51,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       </header>
 
       <div className="border-b">
-        <KpiStrip kpis={kpis} />
+        <KpiStrip kpis={kpis} trend={trend} />
       </div>
 
       <div className="border-b px-4 sm:px-6 py-3 overflow-x-auto">
@@ -64,11 +66,24 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <div className="flex-1 overflow-auto">
         {tasks.length === 0 ? (
-          <p className="px-4 sm:px-6 py-12 text-center text-sm text-muted-foreground">
-            Sin tareas que coincidan con los filtros.
-          </p>
+          <div className="flex flex-col items-center gap-3 px-4 sm:px-6 py-16 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
+              ∅
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              Sin tareas que coincidan con los filtros
+            </p>
+            <p className="max-w-sm text-xs text-muted-foreground">
+              Probá ajustar los filtros, limpiar la búsqueda, o crear una nueva
+              tarea con el botón de arriba o la tecla{" "}
+              <kbd className="rounded border bg-card px-1 font-mono text-[10px]">
+                c
+              </kbd>
+              .
+            </p>
+          </div>
         ) : (
-          <div className="min-w-[760px]">
+          <div className="min-w-[900px]">
             <TaskListHeader sort={filters.sort} dir={filters.dir} />
             <MotionList>
               {tasks.map((t) => (
