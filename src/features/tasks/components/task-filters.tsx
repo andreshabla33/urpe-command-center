@@ -113,13 +113,13 @@ export function TaskFilters({ owners, current, statusCounts }: Props) {
         ]}
       />
       <Select
-        label="Edad"
+        label="Antigüedad"
         value={current.age ?? "all"}
         onChange={(v) => update("age", v)}
         options={[
-          { value: "all", label: "Todas" },
-          { value: "7d", label: "≥ 7 días" },
-          { value: "30d", label: "≥ 30 días" },
+          { value: "all", label: "Cualquiera" },
+          { value: "7d", label: "Más de 1 semana" },
+          { value: "30d", label: "Más de 1 mes" },
         ]}
       />
     </div>

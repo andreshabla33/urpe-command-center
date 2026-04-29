@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 import { getTask, getTaskEvents } from "@/features/tasks/queries";
 import { StatusBadge } from "@/features/tasks/components/status-badge";
 import { PriorityBadge } from "@/features/tasks/components/priority-badge";
@@ -82,7 +83,7 @@ export default async function TaskDetailPage({ params }: Props) {
         <div className="mt-2 flex items-center gap-2">
           <StatusBadge status={task.status ?? "backlog"} />
           <PriorityBadge priority={task.priority ?? "p2"} />
-          <AgeBadge ageDays={task.age_days} />
+          <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
           {task.suggestion && <SuggestionBadge suggestion={task.suggestion} />}
         </div>
       </header>
@@ -113,9 +114,13 @@ export default async function TaskDetailPage({ params }: Props) {
                     )}
                   </p>
                   <p className="font-mono text-[10px] text-muted-foreground">
-                    {format(parseISO(e.timestamp), "yyyy-MM-dd HH:mm")} ·{" "}
+                    {format(parseISO(e.timestamp), "d MMM yyyy, HH:mm", {
+                      locale: es,
+                    })}{" "}
+                    ·{" "}
                     {formatDistanceToNow(parseISO(e.timestamp), {
                       addSuffix: true,
+                      locale: es,
                     })}
                   </p>
                   {e.event_type === "ai_suggestion" && e.metadata && (
@@ -182,8 +187,24 @@ export default async function TaskDetailPage({ params }: Props) {
               <p className="font-mono">{task.created_by ?? "—"}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Due</p>
-              <p>{task.due_date ? format(parseISO(task.due_date), "yyyy-MM-dd HH:mm") : "—"}</p>
+              <p className="text-muted-foreground">Creada el</p>
+              <p>
+                {task.created_at
+                  ? format(parseISO(task.created_at), "d MMM yyyy, HH:mm", {
+                      locale: es,
+                    })
+                  : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Vence</p>
+              <p>
+                {task.due_date
+                  ? format(parseISO(task.due_date), "d MMM yyyy, HH:mm", {
+                      locale: es,
+                    })
+                  : "—"}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground">Eventos</p>

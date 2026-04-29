@@ -119,7 +119,7 @@ export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
                             </span>
                             <div className="flex gap-1">
                               <PriorityBadge priority={task.priority ?? "p2"} />
-                              <AgeBadge ageDays={task.age_days} />
+                              <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
                             </div>
                           </div>
                         </div>

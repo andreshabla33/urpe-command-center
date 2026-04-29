@@ -10,7 +10,7 @@ export function TaskRow({ task }: { task: TaskRowType }) {
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className="group/row grid grid-cols-[60px_1fr_120px_180px_60px_60px_70px_24px] items-center gap-3 border-b px-4 py-(--row-py) hover:bg-muted/40"
+      className="group/row grid grid-cols-[60px_1fr_120px_180px_110px_60px_70px_24px] items-center gap-3 border-b px-4 py-(--row-py) hover:bg-muted/40"
     >
       <span className="font-mono text-[11px] text-muted-foreground truncate">
         {task.id}
@@ -20,7 +20,7 @@ export function TaskRow({ task }: { task: TaskRowType }) {
         {task.owner_email ?? "—"}
       </span>
       <StatusBadge status={task.status ?? "backlog"} />
-      <AgeBadge ageDays={task.age_days} />
+      <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
       <PriorityBadge priority={task.priority ?? "p2"} />
       {task.suggestion ? (
         <SuggestionBadge suggestion={task.suggestion} />
