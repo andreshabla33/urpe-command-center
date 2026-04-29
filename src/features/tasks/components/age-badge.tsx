@@ -20,7 +20,7 @@ export function AgeBadge({ ageDays, createdAt }: Props) {
         ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
         : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
 
-  const label = createdAt
+  const relative = createdAt
     ? formatDistanceToNowStrict(parseISO(createdAt), {
         locale: es,
         addSuffix: true,
@@ -29,19 +29,29 @@ export function AgeBadge({ ageDays, createdAt }: Props) {
       ? "hoy"
       : `hace ${Math.floor(days)} d`;
 
+  const dateLabel = createdAt
+    ? format(parseISO(createdAt), "d MMM yyyy", { locale: es })
+    : null;
+
   const tooltip = createdAt
     ? `Creada ${format(parseISO(createdAt), "d MMM yyyy, HH:mm", { locale: es })}`
     : undefined;
 
   return (
-    <span
-      title={tooltip}
-      className={cn(
-        "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] tabular-nums",
-        tone,
+    <div title={tooltip} className="flex flex-col items-start gap-0.5 leading-tight">
+      <span
+        className={cn(
+          "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] tabular-nums",
+          tone,
+        )}
+      >
+        {relative}
+      </span>
+      {dateLabel && (
+        <span className="font-mono text-[9px] tabular-nums text-muted-foreground">
+          {dateLabel}
+        </span>
       )}
-    >
-      {label}
-    </span>
+    </div>
   );
 }

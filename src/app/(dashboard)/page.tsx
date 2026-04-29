@@ -10,6 +10,7 @@ import { TaskRow } from "@/features/tasks/components/task-row";
 import { TaskListHeader } from "@/features/tasks/components/task-list-header";
 import { KpiStrip } from "@/components/shared/kpi-strip";
 import { TaskFilters } from "@/features/tasks/components/task-filters";
+import { NewTaskButton } from "@/features/tasks/components/new-task-button";
 import { MotionList } from "@/components/shared/motion-list";
 
 type PageProps = {
@@ -37,11 +38,14 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-        <h1 className="text-base sm:text-lg font-semibold tracking-tight">Tareas</h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {tasks.length} {tasks.length === 1 ? "tarea" : "tareas"} · vista lista
-        </p>
+      <header className="flex items-start justify-between gap-3 border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold tracking-tight">Tareas</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {tasks.length} {tasks.length === 1 ? "tarea" : "tareas"} · vista lista
+          </p>
+        </div>
+        <NewTaskButton />
       </header>
 
       <div className="border-b">
