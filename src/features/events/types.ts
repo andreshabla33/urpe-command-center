@@ -16,5 +16,7 @@ export const EVENT_TYPE = [
   "ai_categorized",
   "ai_anomaly",
   "ai_eta",
+  "ai_suggestion_applied",
+  "ai_suggestion_dismissed",
 ] as const;
 export type EventType = (typeof EVENT_TYPE)[number];

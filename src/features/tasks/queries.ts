@@ -76,35 +76,52 @@ async function attachSuggestions(
   ids: string[],
 ): Promise<TaskRow[]> {
   const supabase = await createClient();
-  const { data: suggestions } = await supabase
+  const { data: events } = await supabase
     .from("fact_event")
-    .select("task_id, metadata, timestamp")
-    .eq("event_type", "ai_suggestion")
+    .select("task_id, event_type, metadata, timestamp")
+    .in("event_type", [
+      "ai_suggestion",
+      "ai_suggestion_applied",
+      "ai_suggestion_dismissed",
+    ])
     .in("task_id", ids);
 
-  const latest = new Map<string, AiSuggestion & { ts: string }>();
-  for (const s of suggestions ?? []) {
-    if (!s.task_id || !s.metadata) continue;
-    const m = s.metadata as Record<string, unknown>;
-    const current = latest.get(s.task_id);
-    if (!current || s.timestamp > current.ts) {
-      latest.set(s.task_id, {
-        ts: s.timestamp,
-        generated_at: s.timestamp,
-        action: String(m.action ?? ""),
-        reason: String(m.reason ?? ""),
-        confidence: Number(m.confidence ?? 0),
-        ping_recipients: Array.isArray(m.ping_recipients)
-          ? (m.ping_recipients as string[])
-          : undefined,
-      });
+  const latestSuggestion = new Map<string, AiSuggestion & { ts: string }>();
+  const latestAck = new Map<string, string>();
+
+  for (const e of events ?? []) {
+    if (!e.task_id || !e.metadata) continue;
+    if (e.event_type === "ai_suggestion") {
+      const m = e.metadata as Record<string, unknown>;
+      const current = latestSuggestion.get(e.task_id);
+      if (!current || e.timestamp > current.ts) {
+        latestSuggestion.set(e.task_id, {
+          ts: e.timestamp,
+          generated_at: e.timestamp,
+          action: String(m.action ?? ""),
+          reason: String(m.reason ?? ""),
+          confidence: Number(m.confidence ?? 0),
+          ping_recipients: Array.isArray(m.ping_recipients)
+            ? (m.ping_recipients as string[])
+            : undefined,
+        });
+      }
+    } else {
+      const current = latestAck.get(e.task_id);
+      if (!current || e.timestamp > current) {
+        latestAck.set(e.task_id, e.timestamp);
+      }
     }
   }
 
-  return tasks.map((t) => ({
-    ...t,
-    suggestion: t.id ? latest.get(t.id) ?? null : null,
-  }));
+  return tasks.map((t) => {
+    if (!t.id) return { ...t, suggestion: null };
+    const sugg = latestSuggestion.get(t.id) ?? null;
+    if (!sugg) return { ...t, suggestion: null };
+    const ack = latestAck.get(t.id);
+    if (ack && ack >= sugg.ts) return { ...t, suggestion: null };
+    return { ...t, suggestion: sugg };
+  });
 }
 
 export async function getTask(id: string): Promise<TaskRow | null> {
@@ -200,6 +217,32 @@ export async function getKpis(): Promise<TaskKpis> {
       : null;
 
   return { open, stuck, p0_active, avg_response_hours };
+}
+
+export async function getStuckSuggestions(limit = 5): Promise<TaskRow[]> {
+  const supabase = await createClient();
+  const { data: tasks, error } = await supabase
+    .from("mv_task_current_state")
+    .select("*")
+    .in("status", ["in_progress", "blocked", "escalated"])
+    .gte("age_days", 1)
+    .order("age_days", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  if (!tasks || tasks.length === 0) return [];
+
+  const ids = tasks.map((t) => t.id).filter((id): id is string => id != null);
+  const enriched = await attachSuggestions(tasks, ids);
+
+  return enriched
+    .filter((t) => t.suggestion && t.suggestion.action !== "wait")
+    .sort((a, b) => {
+      const confA = a.suggestion?.confidence ?? 0;
+      const confB = b.suggestion?.confidence ?? 0;
+      if (confB !== confA) return confB - confA;
+      return (b.age_days ?? 0) - (a.age_days ?? 0);
+    })
+    .slice(0, limit);
 }
 
 export async function listOwners(): Promise<{ email: string; full_name: string | null }[]> {

@@ -138,6 +138,189 @@ export async function createTask(
   return { ok: true, id: parsed.data.id };
 }
 
+const SUGGESTION_ACTIONS = [
+  "ping",
+  "escalate",
+  "reassign",
+  "split",
+  "close",
+  "wait",
+] as const;
+
+const ApplySuggestionSchema = z.object({
+  taskId: z.string().min(1),
+  action: z.enum(SUGGESTION_ACTIONS),
+  suggestionTs: z.string().min(1).optional(),
+  payload: z
+    .object({
+      owner_email: z.string().email().optional(),
+      recipients: z.array(z.string().email()).optional(),
+      reason: z.string().max(500).optional(),
+    })
+    .optional(),
+});
+
+export type ApplySuggestionInput = z.infer<typeof ApplySuggestionSchema>;
+
+export async function applySuggestion(
+  input: ApplySuggestionInput,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = ApplySuggestionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid input" };
+  }
+  const { taskId, action, suggestionTs, payload } = parsed.data;
+
+  const userClient = await createClient();
+  const {
+    data: { user },
+  } = await userClient.auth.getUser();
+  if (!user?.email) return { ok: false, error: "not_authenticated" };
+
+  const supabase = createServiceRoleClient();
+  const now = new Date().toISOString();
+
+  if (action === "wait") {
+    const { error } = await supabase.from("fact_event").insert({
+      task_id: taskId,
+      event_type: "ai_suggestion_dismissed",
+      actor_email: user.email,
+      timestamp: now,
+      metadata: {
+        source_suggestion_ts: suggestionTs ?? null,
+        reason: payload?.reason ?? "user_clicked_wait",
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/");
+    return { ok: true };
+  }
+
+  if (action === "ping") {
+    const { error } = await supabase.from("fact_event").insert({
+      task_id: taskId,
+      event_type: "ping",
+      actor_email: user.email,
+      timestamp: now,
+      metadata: {
+        source: "ai_suggestion",
+        recipients: payload?.recipients ?? [],
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+  } else if (action === "escalate" || action === "close") {
+    const newStatus = action === "escalate" ? "escalated" : "done";
+    const { data: task } = await supabase
+      .from("dim_task")
+      .select("status")
+      .eq("id", taskId)
+      .single();
+    if (task && task.status !== newStatus) {
+      await supabase.from("dim_task").update({ status: newStatus }).eq("id", taskId);
+      await supabase.from("fact_event").insert({
+        task_id: taskId,
+        event_type: "status_changed",
+        actor_email: user.email,
+        timestamp: now,
+        metadata: { from: task.status, to: newStatus, source: "ai_suggestion" },
+      });
+    }
+  } else if (action === "reassign") {
+    if (!payload?.owner_email) {
+      return { ok: false, error: "reassign_requires_owner_email" };
+    }
+    const { data: task } = await supabase
+      .from("dim_task")
+      .select("owner_email")
+      .eq("id", taskId)
+      .single();
+    if (task && task.owner_email !== payload.owner_email) {
+      await supabase
+        .from("dim_task")
+        .update({ owner_email: payload.owner_email })
+        .eq("id", taskId);
+      await supabase.from("fact_event").insert({
+        task_id: taskId,
+        event_type: "assigned",
+        actor_email: user.email,
+        timestamp: now,
+        metadata: {
+          from: task.owner_email,
+          to: payload.owner_email,
+          source: "ai_suggestion",
+        },
+      });
+    }
+  }
+  // "split" no muta nada — solo registra el applied y el usuario crea sub-tareas a mano.
+
+  const { error: appliedErr } = await supabase.from("fact_event").insert({
+    task_id: taskId,
+    event_type: "ai_suggestion_applied",
+    actor_email: user.email,
+    timestamp: now,
+    metadata: {
+      source_suggestion_ts: suggestionTs ?? null,
+      action,
+      payload: payload ?? {},
+    },
+  });
+  if (appliedErr) return { ok: false, error: appliedErr.message };
+
+  await supabase.rpc("refresh_mv_task_current_state");
+
+  revalidatePath("/");
+  revalidatePath("/kanban");
+  revalidatePath(`/tasks/${taskId}`);
+
+  await captureServerEvent({
+    email: user.email,
+    event: "ai_suggestion_applied",
+    properties: { task_id: taskId, action },
+  });
+
+  return { ok: true };
+}
+
+const DismissSuggestionSchema = z.object({
+  taskId: z.string().min(1),
+  suggestionTs: z.string().min(1).optional(),
+  reason: z.string().max(500).optional(),
+});
+
+export async function dismissSuggestion(
+  input: z.infer<typeof DismissSuggestionSchema>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = DismissSuggestionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid input" };
+  }
+  const { taskId, suggestionTs, reason } = parsed.data;
+
+  const userClient = await createClient();
+  const {
+    data: { user },
+  } = await userClient.auth.getUser();
+  if (!user?.email) return { ok: false, error: "not_authenticated" };
+
+  const supabase = createServiceRoleClient();
+  const { error } = await supabase.from("fact_event").insert({
+    task_id: taskId,
+    event_type: "ai_suggestion_dismissed",
+    actor_email: user.email,
+    timestamp: new Date().toISOString(),
+    metadata: {
+      source_suggestion_ts: suggestionTs ?? null,
+      reason: reason ?? "user_dismissed",
+    },
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/");
+  revalidatePath(`/tasks/${taskId}`);
+  return { ok: true };
+}
+
 const TaskIdSchema = z.object({ taskId: z.string().min(1) });
 
 export async function pingTask(input: { taskId: string }) {

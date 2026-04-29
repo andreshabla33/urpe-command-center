@@ -7,6 +7,7 @@ import { StatusBadge } from "@/features/tasks/components/status-badge";
 import { PriorityBadge } from "@/features/tasks/components/priority-badge";
 import { AgeBadge } from "@/features/tasks/components/age-badge";
 import { SuggestionBadge } from "@/features/tasks/components/suggestion-badge";
+import { SuggestionActionButtons } from "@/features/tasks/components/suggestion-action-buttons";
 import { TaskActions } from "@/features/tasks/components/task-actions";
 import {
   getTaskEmails,
@@ -80,11 +81,20 @@ export default async function TaskDetailPage({ params }: Props) {
           <span className="font-mono text-xs text-muted-foreground">{task.id}</span>
           <h1 className="text-base sm:text-lg font-semibold tracking-tight">{task.title}</h1>
         </div>
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <StatusBadge status={task.status ?? "backlog"} />
           <PriorityBadge priority={task.priority ?? "p2"} />
           <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
-          {task.suggestion && <SuggestionBadge suggestion={task.suggestion} />}
+          {task.suggestion && (
+            <>
+              <SuggestionBadge suggestion={task.suggestion} />
+              <SuggestionActionButtons
+                taskId={task.id ?? id}
+                suggestion={task.suggestion}
+                variant="inline"
+              />
+            </>
+          )}
         </div>
       </header>
 

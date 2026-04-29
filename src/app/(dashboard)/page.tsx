@@ -12,6 +12,7 @@ import { TaskListHeader } from "@/features/tasks/components/task-list-header";
 import { KpiStrip } from "@/components/shared/kpi-strip";
 import { TaskFilters } from "@/features/tasks/components/task-filters";
 import { NewTaskButton } from "@/features/tasks/components/new-task-button";
+import { SuggestionsBar } from "@/features/tasks/components/suggestions-bar";
 import { MotionList } from "@/components/shared/motion-list";
 
 type PageProps = {
@@ -53,6 +54,10 @@ export default async function HomePage({ searchParams }: PageProps) {
       <div className="border-b">
         <KpiStrip kpis={kpis} trend={trend} />
       </div>
+
+      <Suspense fallback={null}>
+        <SuggestionsBar />
+      </Suspense>
 
       <div className="border-b px-4 sm:px-6 py-3 overflow-x-auto">
         <Suspense fallback={null}>
