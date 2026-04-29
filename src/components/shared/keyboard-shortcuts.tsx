@@ -12,6 +12,7 @@ const NAV: Record<string, string> = {
   c: "/calendar",
   g: "/graph",
   a: "/analytics",
+  o: "/office",
   i: "/",
 };
 
