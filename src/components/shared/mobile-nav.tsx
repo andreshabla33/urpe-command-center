@@ -25,6 +25,7 @@ export function MobileNav({ userEmail }: { userEmail: string }) {
           <SidebarContent
             userEmail={userEmail}
             onNavigate={() => setOpen(false)}
+            forceExpanded
           />
         </SheetContent>
       </Sheet>

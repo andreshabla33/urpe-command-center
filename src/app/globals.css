@@ -215,6 +215,7 @@
   --font-mono: var(--font-geist-mono);
 
   --row-py: 0.625rem;
+  --sidebar-width: 15rem;
 
   --shadow-hairline:
     0 0 0 1px var(--border),
@@ -234,6 +235,9 @@
   }
   html[data-density="compact"] {
     --row-py: 0.25rem;
+  }
+  html[data-sidebar="collapsed"] {
+    --sidebar-width: 3.5rem;
   }
 }
 

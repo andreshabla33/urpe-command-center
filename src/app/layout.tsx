@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,7 @@ export const viewport: import("next").Viewport = {
   userScalable: false,
 };
 
-const DENSITY_BOOTSTRAP_SCRIPT = `(function(){try{var d=localStorage.getItem('urpe-density');if(d==='compact'||d==='comfortable')document.documentElement.dataset.density=d;}catch(e){}})();`;
+const DENSITY_BOOTSTRAP_SCRIPT = `(function(){try{var d=localStorage.getItem('urpe-density');if(d==='compact'||d==='comfortable')document.documentElement.dataset.density=d;var s=localStorage.getItem('urpe-sidebar-collapsed');if(s==='1')document.documentElement.dataset.sidebar='collapsed';}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -54,7 +55,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TooltipProvider delayDuration={400} skipDelayDuration={0}>
+            {children}
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
