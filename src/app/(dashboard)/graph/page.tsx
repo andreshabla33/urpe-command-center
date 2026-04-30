@@ -12,8 +12,10 @@ export default async function GraphPage() {
           Tareas agrupadas por owner; aristas tenues unen tareas del mismo proyecto.
         </p>
       </header>
-      <div className="flex-1 overflow-hidden">
-        <TaskGraph tasks={tasks} />
+      <div className="relative flex-1 min-h-[60vh] md:min-h-0">
+        <div className="absolute inset-0">
+          <TaskGraph tasks={tasks} />
+        </div>
       </div>
     </main>
   );

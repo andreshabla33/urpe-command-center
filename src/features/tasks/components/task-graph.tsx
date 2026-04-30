@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   ReactFlow,
   Background,
@@ -8,6 +9,7 @@ import {
   MiniMap,
   type Node,
   type Edge,
+  type ColorMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { TaskRow } from "../queries";
@@ -15,17 +17,42 @@ import type { TaskRow } from "../queries";
 const COLUMN_WIDTH = 280;
 const ROW_HEIGHT = 70;
 
+function resolveColorMode(theme: string | undefined): ColorMode {
+  return theme === "dark" ? "dark" : "light";
+}
+
 export function TaskGraph({ tasks }: { tasks: TaskRow[] }) {
   const { nodes, edges } = useMemo(() => buildGraph(tasks), [tasks]);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const colorMode: ColorMode = mounted ? resolveColorMode(resolvedTheme) : "light";
 
   return (
-    <div className="h-full w-full">
-      <ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.2 }}>
-        <Background />
-        <Controls />
-        <MiniMap pannable zoomable />
-      </ReactFlow>
-    </div>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      fitView
+      fitViewOptions={{ padding: 0.2 }}
+      colorMode={colorMode}
+      proOptions={{ hideAttribution: true }}
+      panOnScroll={!isMobile}
+      zoomOnPinch
+    >
+      <Background />
+      <Controls showInteractive={!isMobile} />
+      {!isMobile && <MiniMap pannable zoomable />}
+    </ReactFlow>
   );
 }
 
