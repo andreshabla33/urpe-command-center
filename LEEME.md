@@ -184,7 +184,87 @@ El Command Center es PWA instalable en iOS y Android. Mobile (≤768px):
 
 **Web Push** funcional en ambas plataformas (con VAPID keys configuradas).
 
-## 9. Limitaciones conocidas
+## 9. Tokens de API — automatización con scripts y agentes IA
+
+Si querés que un script, bot o agente IA (ej. Rocky, NEXUS, los que usen tus colaboradores) opere el dashboard automáticamente, generás un **Personal Access Token (PAT)** desde `/settings/tokens`.
+
+### Cómo crear un token
+
+1. Logueá al dashboard
+2. Click en **"Tokens API"** abajo del sidebar (junto a Theme/Density/Salir)
+3. Click **"+ Nuevo token"**
+4. Llená:
+   - **Nombre**: descriptivo, lo vas a recordar después (ej. "Rocky bot", "Mi sync N18", "Triage script")
+   - **Scopes** (permisos): tildá solo lo que el token necesita hacer:
+     - `tasks.read` — leer la lista y detalle de tareas
+     - `tasks.create` — crear tareas nuevas
+     - `tasks.update` — cambiar status, owner, prioridad
+     - `events.write` — pingear, comentar, escalar, registrar emails
+     - `persons.read` — leer la lista de personas (para resolver owners)
+     - `projects.read` — leer la lista de proyectos
+   - **Expira**: 30 / 90 / 365 días o nunca (default 90 días)
+5. Click **"Crear token"**
+6. **Copialo ahora.** Solo se muestra UNA vez. Pegalo en la configuración de tu agente/script.
+
+### Reglas importantes
+
+- **El token actúa AS vos.** Cuando tu agente crea una tarea con tu token, en el dashboard aparece "creada por [tu email]". Tu agente no puede hacer cosas que vos no podés hacer (los scopes están limitados por tu rol).
+- **Visibilidad**: el token ve lo mismo que verías vos en el dashboard. Si sos asesor, el token solo ve tus tareas. Si sos admin, el token ve todo.
+- **Audit trail**: cada acción del token deja huella en el timeline de la tarea con un marker "vía API: <nombre del token>". Diego puede saber siempre qué token hizo qué.
+- **Si lo perdés o lo filtraste**, andá a `/settings/tokens`, encontrá el token (por el nombre que le pusiste), click **"Revocar"**. Cualquier script/agente que lo use pierde acceso inmediatamente.
+- **Rotación recomendada**: cada 90 días generá un token nuevo, actualizalo en tu agente, y revocá el viejo. Reduce el riesgo de leak.
+
+### Cómo usarlo en un script o agente
+
+Cada request HTTP debe incluir el header `Authorization: Bearer <token>`:
+
+```bash
+# Verificar que el token funciona
+curl -H "Authorization: Bearer mi_token_xxxxx" \
+  https://urpe-command-center.vercel.app/api/v1/auth/me
+
+# Crear una tarea
+curl -X POST \
+  -H "Authorization: Bearer mi_token_xxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{"id":"URPE-IS-099","title":"Auditar repos","owner_email":"vl@urpeailab.com"}' \
+  https://urpe-command-center.vercel.app/api/v1/tasks
+```
+
+### Documentación interactiva del API
+
+Para que el desarrollador del agente sepa qué endpoints existen y cómo usarlos:
+
+- **`/api/v1/docs`** — interfaz visual con todos los endpoints, ejemplos, botón "Try it" para probar en vivo
+- **`/api/v1/openapi.json`** — spec técnico para auto-generar clientes (Python, TypeScript, etc.)
+
+### Endpoints disponibles (resumen)
+
+**Sobre tareas:**
+- Crear tarea (`POST /api/v1/tasks`)
+- Cambiar status (`POST /api/v1/tasks/:id/transitions`)
+- Reasignar owner (`POST /api/v1/tasks/:id/assignments`)
+- Comentar (`POST /api/v1/tasks/:id/comments`)
+- Pingear (`POST /api/v1/tasks/:id/pings`)
+- Escalar (`POST /api/v1/tasks/:id/escalations`)
+- Registrar email enviado/recibido (`POST /api/v1/tasks/:id/email-events`)
+
+**Lectura:**
+- Lista tareas con filtros (`GET /api/v1/tasks`)
+- Detalle de una tarea (`GET /api/v1/tasks/:id`)
+- Timeline de eventos de una tarea (`GET /api/v1/tasks/:id/events`)
+- Lista de personas activas (`GET /api/v1/persons`)
+- Lista de proyectos (`GET /api/v1/projects`)
+- Introspect del token actual (`GET /api/v1/auth/me`)
+
+### Límites técnicos
+
+- **Rate limit**: 60 requests por minuto por token. Si lo excedés, recibís 429 con header `Retry-After`.
+- **Idempotencia**: para POSTs, agregar `Idempotency-Key: <uuid>` al header. Si tu script reintenta por timeout, recibís la respuesta original (no se duplica la acción). 24 horas de TTL.
+- **Tamaño**: cada batch máximo 100 elementos.
+
+## 10. Limitaciones conocidas
 
 - **Gmail thread embed**: bloqueado por GCP org policy (`cowork` project). No se ven los hilos de Gmail dentro del detalle de tarea hasta que se destrabé.
 - **Kapso webhook**: pendiente conectar el segundo URL en panel Kapso para que mensajes WhatsApp del bot se vinculen automáticamente a tareas.
@@ -485,6 +565,87 @@ WhatsApp inbound desde Kapso bot. Multi-webhook configurado (uno apunta a Mónic
 - Batch: `{events: [...]}` (max 100)
 - Respuestas: 201 nuevo, 200 dedup, 401 auth, 422 zod, 503 endpoint sin token
 
+### `/api/v1/*` — Public API con Personal Access Tokens
+
+API REST event-aware genérica para que cualquier usuario habilite a sus scripts/bots/agentes IA a operar el dashboard. Implementación completa en `src/features/api/` (vertical slice) y rutas en `src/app/api/v1/`.
+
+**Auth:**
+- Bearer token resuelto en `src/features/api/auth.ts` vía `resolveTokenFromRequest`
+- Hash SHA-256 del plaintext en `dim_user_token.token_hash` (nunca plain en DB)
+- Token resolve incluye: `agent_email` = owner, role en vivo desde `dim_person`, scopes pre-acotados por rol del usuario al momento de crear el token
+- HOF `withApi({ scopes })` en `src/features/api/with-api.ts` envuelve cada handler con bearer + scope check + rate limit
+
+**Audit trail por request:**
+- `fact_event.actor_email = ownerEmail` (consistencia con UI: el token actúa AS el usuario)
+- `metadata.via_token = nombre amigable` ("Rocky bot")
+- `metadata.token_hash_prefix = primeros 8 chars` (correlación con `dim_user_token` sin exponer el hash completo)
+- `metadata.source = "api_v1"` (distingue de UI / cron / webhook)
+
+**Endpoints (12 routes):**
+
+Write (POST):
+- `/api/v1/tasks` → `fact_event(created)` + INSERT `dim_task`
+- `/api/v1/tasks/:id/transitions` → `fact_event(status_changed)` + UPDATE
+- `/api/v1/tasks/:id/assignments` → `fact_event(assigned)` + UPDATE
+- `/api/v1/tasks/:id/comments` → `fact_event(comment)`
+- `/api/v1/tasks/:id/pings` → `fact_event(ping)`
+- `/api/v1/tasks/:id/escalations` → `fact_event(escalated)` + UPDATE status
+- `/api/v1/tasks/:id/email-events` → `fact_event(email_sent|email_received)`
+
+Read (GET):
+- `/api/v1/tasks` (filtros + visibility por rol)
+- `/api/v1/tasks/:id` (detail + visibility)
+- `/api/v1/tasks/:id/events` (timeline)
+- `/api/v1/persons?active=true`
+- `/api/v1/projects`
+
+Meta:
+- `/api/v1/auth/me` (introspect identity + scopes)
+- `/api/v1/openapi.json` (spec OpenAPI 3.1 hand-built en `src/features/api/openapi-spec.ts`)
+- `/api/v1/docs` (Scalar UI tema purple, vía `@scalar/nextjs-api-reference`)
+
+**Visibility filter:**
+- `admin` y `liderazgo` → ven todas las tareas
+- otros roles → solo `WHERE owner_email = user OR created_by = user`
+- Aplicado en cada `GET` que toca `mv_task_current_state` o `dim_task`
+
+**Idempotencia:**
+- Header opcional `Idempotency-Key: <uuid>` en POSTs
+- Tabla `request_idempotency` (24h TTL, body hash dedup)
+- Helper `checkIdempotency` + `storeIdempotentResponse` en `src/features/api/idempotency.ts`
+- Body hash = SHA-256 del request body normalizado → si reusás key con body distinto, 409 conflict
+
+**Rate limiting:**
+- 60 req/min por token, sliding window
+- Tabla `api_rate_limit_window` (key: `token_hash + bucket_minute`)
+- RPC atomic `public.increment_rate_limit_count(token_hash, bucket)`
+- Cleanup vía pg_cron `cleanup-api-ephemeral` (cada hora)
+
+**Schema (migration `20260501130000_user_tokens_api`):**
+```sql
+dim_user_token (
+  token_hash text PRIMARY KEY,                     -- sha256
+  owner_email text REFERENCES dim_person(email),
+  name text NOT NULL,
+  scopes text[] NOT NULL,
+  created_at, last_used_at, expires_at, revoked_at
+)
+request_idempotency (key, owner_email, request_hash, response_status, response_body, expires_at)
+api_rate_limit_window (token_hash, bucket_minute, request_count)
+```
+
+**UI auto-servicio (`/settings/tokens`):**
+- Server Component que lista tokens del usuario
+- Server Action `createUserToken` valida `scopes ⊆ ROLE_SCOPES[user.role]`, genera plaintext, hashea, guarda
+- Plaintext mostrado UNA vez al crear (después solo hash prefix)
+- Server Action `revokeUserTokenByPrefix` para revoke instantáneo
+- Link "Tokens API" en sidebar footer
+
+**Scopes registry (`src/features/api/scopes.ts`):**
+- 6 scopes canónicos: `tasks.read | tasks.create | tasks.update | events.write | persons.read | projects.read`
+- Matrix `ROLE_SCOPES` define qué puede otorgar cada rol
+- Helper `validateScopesForRole(requested, role)` rechaza scopes que el rol no permite
+
 ## 8. Crons (pg_cron)
 
 | Job | Schedule | Función |
@@ -494,6 +655,7 @@ WhatsApp inbound desde Kapso bot. Multi-webhook configurado (uno apunta a Mónic
 | `suggest-action-hourly` | `15 * * * *` | HTTP POST a `suggest-action` |
 | `daily-summary` | `0 7 * * *` (7 AM UTC) | HTTP POST a `daily-summary` |
 | `gmail-watch-renew` | `0 0 * * *` (diario) | HTTP POST a `gmail-watch-renew` (renueva subscription) |
+| `cleanup-api-ephemeral` | `7 * * * *` (cada hora) | Limpia `request_idempotency` (>24h) y `api_rate_limit_window` (>5min) |
 
 Las URLs y bearer (`urpe_service_role_key`) viven en Supabase Vault, no commiteadas.
 
