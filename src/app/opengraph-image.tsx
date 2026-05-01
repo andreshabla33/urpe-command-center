@@ -2,18 +2,19 @@ import { ImageResponse } from "next/og";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const size = { width: 64, height: 64 };
+export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const alt = "URPE Command Center · Numero 18 Operations Division";
 
-function loadMarkBase64(): string {
+function loadLockupBase64(): string {
   const buf = readFileSync(
-    join(process.cwd(), "public/brand/v4-mark-only.jpg"),
+    join(process.cwd(), "public/brand/v4-horizontal-lockup.jpg"),
   );
   return `data:image/jpeg;base64,${buf.toString("base64")}`;
 }
 
-export default function Icon() {
-  const src = loadMarkBase64();
+export default function OpenGraphImage() {
+  const src = loadLockupBase64();
   return new ImageResponse(
     (
       <div
@@ -29,10 +30,10 @@ export default function Icon() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
-          alt="URPE"
-          width={64}
-          height={64}
-          style={{ objectFit: "cover" }}
+          alt={alt}
+          width={1100}
+          height={367}
+          style={{ objectFit: "contain" }}
         />
       </div>
     ),
