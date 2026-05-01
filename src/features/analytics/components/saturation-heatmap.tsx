@@ -75,8 +75,12 @@ export function SaturationHeatmap({ cells }: { cells: HeatmapCell[] }) {
 function intensityClass(count: number, max: number): string {
   if (count === 0) return "text-muted-foreground/40";
   const ratio = count / max;
-  if (ratio >= 0.75) return "bg-red-500/20 text-red-700 dark:text-red-400";
-  if (ratio >= 0.5) return "bg-amber-500/20 text-amber-700 dark:text-amber-400";
-  if (ratio >= 0.25) return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
-  return "bg-muted text-muted-foreground";
+  // Brand-restricted heat: gold scale, crimson reserved para nivel crítico (>=75%)
+  if (ratio >= 0.75)
+    return "bg-[var(--brand-crimson)]/20 text-[var(--brand-crimson)]";
+  if (ratio >= 0.5)
+    return "bg-[var(--brand-bright-gold)]/22 text-[var(--brand-bright-gold)]";
+  if (ratio >= 0.25)
+    return "bg-[var(--brand-gold)]/14 text-[var(--brand-gold)]";
+  return "bg-[var(--brand-silver)]/8 text-[var(--brand-silver)]";
 }

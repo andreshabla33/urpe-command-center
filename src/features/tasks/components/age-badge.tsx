@@ -13,12 +13,13 @@ export function AgeBadge({ ageDays, createdAt }: Props) {
   }
 
   const days = ageDays ?? 0;
+  // Brand-restricted heat: crimson (atascada >7d), bright gold (3-7d), gold (fresca).
   const tone =
     days >= 7
-      ? "bg-red-500/15 text-red-600 dark:text-red-400"
+      ? "bg-[var(--brand-crimson)]/15 text-[var(--brand-crimson)] ring-1 ring-inset ring-[var(--brand-crimson)]/35"
       : days >= 3
-        ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-        : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
+        ? "bg-[var(--brand-bright-gold)]/15 text-[var(--brand-bright-gold)] ring-1 ring-inset ring-[var(--brand-bright-gold)]/35"
+        : "bg-[var(--brand-gold)]/12 text-[var(--brand-gold)] ring-1 ring-inset ring-[var(--brand-gold)]/30";
 
   const relative = createdAt
     ? formatDistanceToNowStrict(parseISO(createdAt), {

@@ -46,9 +46,9 @@ export function OfflineIndicator() {
   return (
     <div
       className={
-        "rounded border px-2 py-1 text-[10px] font-mono " +
+        "rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-[0.12em] " +
         (online
-          ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+          ? "border-[var(--brand-bright-gold)]/40 bg-[var(--brand-bright-gold)]/10 text-[var(--brand-bright-gold)]"
           : "border-destructive/40 bg-destructive/10 text-destructive")
       }
     >
