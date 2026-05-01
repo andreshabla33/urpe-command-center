@@ -108,6 +108,12 @@ function ExpandedFooter({ userEmail }: { userEmail: string }) {
         <ThemeToggle />
         <DensityToggle />
         <PushToggle />
+        <a
+          href="/settings/tokens"
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          Tokens API
+        </a>
         <form action={signOut}>
           <button
             type="submit"
