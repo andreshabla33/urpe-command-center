@@ -79,7 +79,7 @@ export default async function TaskDetailPage({ params }: Props) {
         </Link>
         <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-mono text-xs text-muted-foreground">{task.id}</span>
-          <h1 className="text-base sm:text-lg font-semibold tracking-tight">{task.title}</h1>
+          <h1 className="h-display text-xl sm:text-2xl text-foreground">{task.title}</h1>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <StatusBadge status={task.status ?? "backlog"} />
@@ -106,9 +106,7 @@ export default async function TaskDetailPage({ params }: Props) {
             </p>
           )}
 
-          <h2 className="mt-8 mb-3 text-xs uppercase tracking-widest text-muted-foreground">
-            Timeline
-          </h2>
+          <h2 className="h-caption mt-8 mb-3 text-xs">Timeline</h2>
           <ol className="space-y-2">
             {events.map((e) => (
               <li key={e.id} className="flex gap-3 border-l border-border pl-3">
@@ -145,9 +143,7 @@ export default async function TaskDetailPage({ params }: Props) {
         </section>
 
         <aside className="w-full md:w-80 shrink-0 border-t md:border-t-0 md:border-l md:overflow-y-auto p-4">
-          <h3 className="text-xs uppercase tracking-widest text-muted-foreground">
-            Acciones
-          </h3>
+          <h3 className="h-caption text-xs">Acciones</h3>
           <div className="mt-3 flex flex-col gap-2">
             <TaskActions taskId={task.id ?? id} />
             {calendarConnected ? (
@@ -167,9 +163,7 @@ export default async function TaskDetailPage({ params }: Props) {
             )}
           </div>
 
-          <h3 className="mt-6 text-xs uppercase tracking-widest text-muted-foreground">
-            Email thread ({emails.length})
-          </h3>
+          <h3 className="h-caption mt-6 text-xs">Email thread ({emails.length})</h3>
           <div className="mt-3">
             <EmailThread emails={emails} />
           </div>

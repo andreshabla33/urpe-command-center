@@ -5,12 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "URPE Command Center",
     short_name: "URPE",
     description:
-      "Single pane of glass para operar el ecosistema URPE en tiempo real.",
+      "Numero 18 Operations Division. Single pane of glass para operar el ecosistema URPE en tiempo real.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: "#0a1f44",
+    theme_color: "#0a1f44",
     icons: [
       { src: "/icon", sizes: "32x32", type: "image/png" },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },

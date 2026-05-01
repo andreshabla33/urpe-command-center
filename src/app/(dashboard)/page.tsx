@@ -43,8 +43,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex items-start justify-between gap-3 border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
         <div>
-          <h1 className="text-base sm:text-lg font-semibold tracking-tight">Tareas</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <h1 className="h-display text-2xl sm:text-3xl text-foreground">Tareas</h1>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
             {tasks.length} {tasks.length === 1 ? "tarea" : "tareas"} · vista lista
           </p>
         </div>

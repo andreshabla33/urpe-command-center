@@ -47,10 +47,10 @@ export default async function CalendarPage({ searchParams }: Props) {
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
         <div>
-          <h1 className="text-base sm:text-lg font-semibold tracking-tight capitalize">
+          <h1 className="h-display text-2xl sm:text-3xl capitalize text-foreground">
             {format(cursor, "MMMM yyyy")}
           </h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             Tareas por fecha de vencimiento.
           </p>
         </div>

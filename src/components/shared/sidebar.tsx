@@ -70,10 +70,10 @@ export function SidebarContent({
           </div>
         ) : (
           <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
               URPE
             </p>
-            <p className="mt-0.5 truncate text-sm font-semibold tracking-tight">
+            <p className="h-display mt-0.5 truncate text-sm uppercase tracking-[0.04em] text-sidebar-foreground">
               Command Center
             </p>
           </div>

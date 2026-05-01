@@ -17,8 +17,8 @@ export default async function AnalyticsPage() {
   return (
     <main className="flex flex-1 flex-col overflow-y-auto">
       <header className="border-b px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-        <h1 className="text-base sm:text-lg font-semibold tracking-tight">Analytics</h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">
+        <h1 className="h-display text-2xl sm:text-3xl text-foreground">Analytics</h1>
+        <p className="mt-1 text-xs text-muted-foreground">
           Burn-down · saturación · resumen ejecutivo diario (Claude Opus 4.7)
         </p>
       </header>
