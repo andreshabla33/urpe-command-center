@@ -8,6 +8,7 @@ import { PriorityBadge } from "@/features/tasks/components/priority-badge";
 import { AgeBadge } from "@/features/tasks/components/age-badge";
 import { SuggestionBadge } from "@/features/tasks/components/suggestion-badge";
 import { SuggestionActionButtons } from "@/features/tasks/components/suggestion-action-buttons";
+import { CreatorBadge } from "@/features/tasks/components/creator-badge";
 import { TaskActions } from "@/features/tasks/components/task-actions";
 import {
   getTaskEmails,
@@ -85,6 +86,7 @@ export default async function TaskDetailPage({ params }: Props) {
           <StatusBadge status={task.status ?? "backlog"} />
           <PriorityBadge priority={task.priority ?? "p2"} />
           <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
+          <CreatorBadge creator={task.creator} variant="full" />
           {task.suggestion && (
             <>
               <SuggestionBadge suggestion={task.suggestion} />

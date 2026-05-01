@@ -3,6 +3,7 @@ import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
 import { AgeBadge } from "./age-badge";
 import { SuggestionBadge } from "./suggestion-badge";
+import { CreatorBadge } from "./creator-badge";
 import { QuickStatusMenu } from "./quick-status-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { TaskRow as TaskRowType } from "../queries";
@@ -16,8 +17,11 @@ export function TaskRow({ task }: { task: TaskRowType }) {
       <span className="font-mono text-[11px] text-muted-foreground/80 truncate">
         {task.id}
       </span>
-      <span className="truncate text-sm font-medium text-foreground">
-        {task.title}
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span className="truncate text-sm font-medium text-foreground">
+          {task.title}
+        </span>
+        <CreatorBadge creator={task.creator} variant="compact" />
       </span>
       <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
         <UserAvatar email={task.owner_email} size="xs" />

@@ -14,7 +14,20 @@ export type AiSuggestion = {
   generated_at: string;
 };
 
-export type TaskRow = RawTaskRow & { suggestion: AiSuggestion | null };
+/**
+ * Trazabilidad del origen de una tarea — derivado de `fact_event(created)`.
+ * Permite distinguir creación manual (UI) vs. agente vía API vs. cron.
+ */
+export type TaskCreator = {
+  actor: string | null;            // actor_email del evento created
+  source?: string;                 // "ui_create" | "api_v1" | "cron" | "PENDIENTES.md" | etc.
+  via_token?: string;              // nombre del PAT si vino via api_v1
+};
+
+export type TaskRow = RawTaskRow & {
+  suggestion: AiSuggestion | null;
+  creator?: TaskCreator;
+};
 
 const ACTIVE_STATUSES = ["backlog", "in_progress", "blocked", "escalated"] as const;
 
@@ -53,7 +66,8 @@ export async function getTasks(
   if (tasks.length === 0) return [];
 
   const ids = tasks.map((t) => t.id).filter((id): id is string => id != null);
-  return attachSuggestions(tasks, ids);
+  const withSuggestions = await attachSuggestions(tasks, ids);
+  return attachCreators(withSuggestions, ids);
 }
 
 export type StatusCounts = Record<string, number>;
@@ -124,6 +138,43 @@ async function attachSuggestions(
   });
 }
 
+/**
+ * Adjunta info del `creator` a cada tarea leyendo el evento `created` más
+ * antiguo del `fact_event`. Permite distinguir tareas creadas vía UI vs API
+ * vs cron en la lista y el detalle.
+ *
+ * Idempotente: si una tarea no tiene `created` event (caso seed antiguo o
+ * sync que no lo emitió), `creator` queda undefined.
+ */
+async function attachCreators(
+  tasks: TaskRow[],
+  ids: string[],
+): Promise<TaskRow[]> {
+  if (ids.length === 0) return tasks;
+  const supabase = await createClient();
+  const { data: events } = await supabase
+    .from("fact_event")
+    .select("task_id, actor_email, metadata, timestamp")
+    .eq("event_type", "created")
+    .in("task_id", ids)
+    .order("timestamp", { ascending: true });
+
+  const creators = new Map<string, TaskCreator>();
+  for (const e of events ?? []) {
+    if (!e.task_id || creators.has(e.task_id)) continue; // primero (más antiguo) gana
+    const m = (e.metadata as Record<string, unknown> | null) ?? {};
+    creators.set(e.task_id, {
+      actor: e.actor_email,
+      source: typeof m.source === "string" ? m.source : undefined,
+      via_token: typeof m.via_token === "string" ? m.via_token : undefined,
+    });
+  }
+
+  return tasks.map((t) =>
+    t.id ? { ...t, creator: creators.get(t.id) } : t,
+  );
+}
+
 export async function getTask(id: string): Promise<TaskRow | null> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -133,7 +184,9 @@ export async function getTask(id: string): Promise<TaskRow | null> {
     .single();
   if (!data) return null;
   const [withSugg] = await attachSuggestions([data], [id]);
-  return withSugg ?? null;
+  if (!withSugg) return null;
+  const [withCreator] = await attachCreators([withSugg], [id]);
+  return withCreator ?? null;
 }
 
 export async function getTaskEvents(taskId: string): Promise<FactEventRow[]> {
