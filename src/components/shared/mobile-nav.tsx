@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarContent } from "./sidebar";
@@ -30,11 +31,23 @@ export function MobileNav({ userEmail }: { userEmail: string }) {
         </SheetContent>
       </Sheet>
 
-      <div className="flex flex-col items-end leading-tight">
-        <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          URPE
-        </span>
-        <span className="text-xs font-semibold">Command Center</span>
+      <div className="flex items-center gap-2">
+        <Image
+          src="/brand/v4-mark-only.jpg"
+          alt="URPE"
+          width={28}
+          height={28}
+          className="h-7 w-7 rounded shrink-0"
+          priority
+        />
+        <div className="flex flex-col items-start leading-none">
+          <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+            URPE
+          </span>
+          <span className="h-display mt-0.5 text-[11px] uppercase tracking-[0.04em] text-sidebar-foreground">
+            Command Center
+          </span>
+        </div>
       </div>
     </header>
   );
