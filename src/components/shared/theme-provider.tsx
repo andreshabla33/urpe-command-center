@@ -6,9 +6,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      themes={["light", "dark", "white", "mocha", "system"]}
+      defaultTheme="federal"
+      themes={["federal", "document"]}
+      enableSystem={false}
       disableTransitionOnChange
       storageKey="urpe-theme"
     >
