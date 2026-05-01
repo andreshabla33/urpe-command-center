@@ -71,17 +71,16 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <div className="flex-1 overflow-auto">
         {tasks.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 px-4 sm:px-6 py-16 text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
-              ∅
-            </div>
+          <div className="flex flex-col items-center gap-4 px-4 sm:px-6 py-20 text-center">
+            <p className="h-caption text-[10px] tracking-[0.2em]">
+              VIGILAMUS · OPERAMUR · VINCIMUS
+            </p>
             <p className="text-sm font-medium text-foreground">
               Sin tareas que coincidan con los filtros
             </p>
             <p className="max-w-sm text-xs text-muted-foreground">
-              Probá ajustar los filtros, limpiar la búsqueda, o crear una nueva
-              tarea con el botón de arriba o la tecla{" "}
-              <kbd className="rounded border bg-card px-1 font-mono text-[10px]">
+              Ajuste filtros, limpie búsqueda, o cree nueva tarea con{" "}
+              <kbd className="rounded border bg-card px-1.5 py-0.5 font-mono text-[10px]">
                 c
               </kbd>
               .

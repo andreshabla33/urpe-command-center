@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { signOut } from "@/features/auth/actions";
 import { PushToggle } from "@/features/push/push-toggle";
 import { OfflineIndicator } from "./offline-indicator";
@@ -58,24 +59,36 @@ export function SidebarContent({
       <div
         className={cn(
           "flex items-center justify-between border-b py-3",
-          showCollapsed ? "px-2" : "px-5 py-4",
+          showCollapsed ? "px-2" : "px-4 py-4",
         )}
       >
         {showCollapsed ? (
-          <div
-            className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-            title="URPE Command Center"
-          >
-            U
-          </div>
+          <Image
+            src="/brand/v4-mark-only.jpg"
+            alt="URPE Command Center"
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded shrink-0"
+            priority
+          />
         ) : (
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              URPE
-            </p>
-            <p className="h-display mt-0.5 truncate text-sm uppercase tracking-[0.04em] text-sidebar-foreground">
-              Command Center
-            </p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Image
+              src="/brand/v4-mark-only.jpg"
+              alt="URPE Command Center"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded shrink-0"
+              priority
+            />
+            <div className="min-w-0">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground leading-none">
+                URPE
+              </p>
+              <p className="h-display mt-1 truncate text-[13px] uppercase tracking-[0.04em] leading-none text-sidebar-foreground">
+                Command Center
+              </p>
+            </div>
           </div>
         )}
         {!forceExpanded && <SidebarCollapseToggle />}

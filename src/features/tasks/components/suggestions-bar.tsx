@@ -1,4 +1,14 @@
 import Link from "next/link";
+import {
+  AlertTriangle,
+  Check,
+  Clock,
+  RefreshCw,
+  Send,
+  Split,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { getStuckSuggestions, type TaskRow } from "../queries";
 import { SuggestionActionButtons } from "./suggestion-action-buttons";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -25,13 +35,13 @@ const ACTION_TONE: Record<string, string> = {
   wait: "text-muted-foreground",
 };
 
-const ACTION_GLYPH: Record<string, string> = {
-  ping: "✦",
-  escalate: "▲",
-  reassign: "↻",
-  split: "⫶",
-  close: "✓",
-  wait: "·",
+const ACTION_ICON: Record<string, LucideIcon> = {
+  ping: Send,
+  escalate: AlertTriangle,
+  reassign: RefreshCw,
+  split: Split,
+  close: Check,
+  wait: Clock,
 };
 
 export async function SuggestionsBar() {
@@ -42,16 +52,17 @@ export async function SuggestionsBar() {
     <section className="border-b bg-muted/20 px-4 sm:px-6 py-3">
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="ai-shimmer relative inline-flex h-5 items-center rounded px-2 text-[10px] font-mono uppercase tracking-widest text-primary">
+          <span className="ai-shimmer relative inline-flex h-5 items-center gap-1 rounded px-2 font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+            <Sparkles className="h-3 w-3 relative" aria-hidden />
             <span className="relative">AI</span>
           </span>
-          <h2 className="text-xs font-medium text-foreground">
+          <h2 className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground">
             {tasks.length === 1
               ? "1 sugerencia accionable"
               : `${tasks.length} sugerencias accionables`}
           </h2>
         </div>
-        <span className="hidden text-[10px] text-muted-foreground sm:inline">
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:inline">
           Generadas por N18 · ordenadas por confianza
         </span>
       </div>
@@ -70,18 +81,16 @@ function SuggestionCard({ task }: { task: TaskRow }) {
   if (!s || !task.id) return null;
   const tone = ACTION_TONE[s.action] ?? ACTION_TONE.wait;
   const label = ACTION_LABEL[s.action] ?? s.action;
-  const glyph = ACTION_GLYPH[s.action] ?? "·";
+  const Icon = ACTION_ICON[s.action] ?? Clock;
   const conf = Math.round(s.confidence * 100);
 
   return (
-    <div className="group flex flex-col rounded-md border border-border/70 bg-card p-3 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-shadow hover:shadow-[0_2px_8px_rgb(0_0_0/0.06)]">
+    <div className="group flex flex-col rounded-md border border-border bg-card p-3 shadow-[0_1px_2px_rgb(0_0_0/0.2)] transition-shadow hover:shadow-[0_2px_8px_rgb(0_0_0/0.3)]">
       <div className="flex items-center gap-2">
-        <span className={cn("font-mono text-xs leading-none", tone)} aria-hidden>
-          {glyph}
-        </span>
+        <Icon className={cn("h-3 w-3 shrink-0", tone)} aria-hidden />
         <span
           className={cn(
-            "text-[10px] font-semibold uppercase tracking-widest",
+            "font-mono text-[10px] font-semibold uppercase tracking-[0.16em]",
             tone,
           )}
         >
