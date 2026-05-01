@@ -46,8 +46,9 @@ export function TaskGraph({ tasks }: { tasks: TaskRow[] }) {
       fitViewOptions={{ padding: 0.2 }}
       colorMode={colorMode}
       proOptions={{ hideAttribution: true }}
-      panOnScroll={!isMobile}
+      zoomOnScroll
       zoomOnPinch
+      panOnDrag
     >
       <Background />
       <Controls showInteractive={!isMobile} />
