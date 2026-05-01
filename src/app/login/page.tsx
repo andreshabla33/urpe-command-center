@@ -12,14 +12,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="relative flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-md flex-col items-center text-center">
-        <Image
-          src="/brand/v4-eagle-seal.png"
-          alt="URPE Command Center · Numero 18 Operations Division"
-          width={256}
-          height={256}
-          className="h-56 w-56 sm:h-64 sm:w-64"
-          priority
-        />
+        <div className="relative h-56 w-56 overflow-hidden rounded-full ring-1 ring-[var(--brand-gold)]/30 shadow-[0_0_60px_rgba(197,165,114,0.15)] sm:h-64 sm:w-64">
+          <Image
+            src="/brand/v4-eagle-seal.png"
+            alt="URPE Command Center · Numero 18 Operations Division"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
 
         <h1 className="h-display mt-6 text-3xl uppercase tracking-[0.04em] text-foreground sm:text-4xl">
           URPE Command Center

@@ -97,7 +97,7 @@ export function KpiStrip({
             </div>
             <p
               className={cn(
-                "mt-1 text-2xl font-semibold tracking-tight tabular-nums",
+                "h-display mt-1 text-3xl tracking-[0.02em] tabular-nums",
                 c.tone === "danger" && "text-destructive",
               )}
             >

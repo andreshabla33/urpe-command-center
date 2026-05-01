@@ -58,8 +58,8 @@ export function SidebarContent({
     <>
       <div
         className={cn(
-          "flex items-center justify-between border-b py-3",
-          showCollapsed ? "px-2" : "px-4 py-4",
+          "flex items-center gap-2 border-b py-3",
+          showCollapsed ? "justify-center px-2" : "px-4 py-4",
         )}
       >
         {showCollapsed ? (
@@ -68,28 +68,28 @@ export function SidebarContent({
             alt="URPE Command Center"
             width={32}
             height={32}
-            className="h-8 w-8 rounded shrink-0"
+            className="h-8 w-8 rounded-full shrink-0 ring-1 ring-[var(--brand-gold)]/25"
             priority
           />
         ) : (
-          <div className="flex min-w-0 items-center gap-2.5">
+          <>
             <Image
               src="/brand/v4-mark-only.jpg"
               alt="URPE Command Center"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded shrink-0"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full shrink-0 ring-1 ring-[var(--brand-gold)]/25"
               priority
             />
-            <div className="min-w-0">
+            <div className="flex min-w-0 flex-1 flex-col">
               <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground leading-none">
                 URPE
               </p>
-              <p className="h-display mt-1 truncate text-[13px] uppercase tracking-[0.04em] leading-none text-sidebar-foreground">
+              <p className="h-display mt-1 text-[12px] uppercase tracking-[0.02em] leading-tight text-sidebar-foreground">
                 Command Center
               </p>
             </div>
-          </div>
+          </>
         )}
         {!forceExpanded && <SidebarCollapseToggle />}
       </div>
