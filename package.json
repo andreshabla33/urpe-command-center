@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@scalar/nextjs-api-reference": "^0.10.13",
     "@sentry/nextjs": "^10.50.0",
     "@serwist/next": "^9.5.7",
     "@supabase/ssr": "^0.10.2",

@@ -36,6 +36,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/auth") ||
     path.startsWith("/api/webhooks") ||
     path.startsWith("/api/n18") ||
+    path.startsWith("/api/v1") ||
     path === "/manifest.webmanifest" ||
     path === "/icon" ||
     path === "/apple-icon" ||
