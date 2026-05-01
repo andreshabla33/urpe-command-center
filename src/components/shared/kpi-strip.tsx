@@ -22,10 +22,14 @@ function computeDelta(trend: DailyPoint[]): number | null {
   return Math.round(((recent - prior) / prior) * 100);
 }
 
+/**
+ * Delta tone — brandbook restringido: gold para up, crimson para down, silver flat.
+ * No semánticamente "verde=bueno" sino tonos de la paleta federal.
+ */
 const DELTA_TONE: Record<"up" | "down" | "flat", string> = {
-  up: "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300",
-  down: "bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300",
-  flat: "bg-muted/60 text-muted-foreground ring-border",
+  up: "bg-[var(--brand-gold)]/15 text-[var(--brand-bright-gold)] ring-[var(--brand-gold)]/35",
+  down: "bg-[var(--brand-crimson)]/15 text-[var(--brand-crimson)] ring-[var(--brand-crimson)]/35",
+  flat: "bg-[var(--brand-silver)]/8 text-muted-foreground ring-[var(--brand-silver)]/20",
 };
 
 export function KpiStrip({

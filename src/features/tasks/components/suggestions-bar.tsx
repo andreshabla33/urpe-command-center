@@ -13,12 +13,15 @@ const ACTION_LABEL: Record<string, string> = {
   wait: "Esperar",
 };
 
+/**
+ * Brandbook-restricted palette: gold variants + crimson + silver únicamente.
+ */
 const ACTION_TONE: Record<string, string> = {
-  ping: "text-blue-700 dark:text-blue-300",
-  escalate: "text-rose-700 dark:text-rose-300",
-  reassign: "text-violet-700 dark:text-violet-300",
-  split: "text-cyan-700 dark:text-cyan-300",
-  close: "text-emerald-700 dark:text-emerald-300",
+  ping: "text-[var(--brand-gold)]",
+  escalate: "text-[var(--brand-crimson)]",
+  reassign: "text-[var(--brand-bright-gold)]",
+  split: "text-[var(--brand-silver)]",
+  close: "text-[var(--brand-bright-gold)]",
   wait: "text-muted-foreground",
 };
 

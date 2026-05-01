@@ -1,13 +1,21 @@
 import { cn } from "@/lib/utils";
 import type { AiSuggestion } from "../queries";
 
+/**
+ * Paleta brandbook: navy / gold / crimson / silver únicamente.
+ * Cada acción mapea a un tono coherente con su intensidad operativa.
+ */
 const ACTION_TONE: Record<string, string> = {
-  ping: "bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:text-blue-300 dark:bg-blue-500/15",
-  escalate: "bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300 dark:bg-rose-500/15",
-  reassign: "bg-violet-500/10 text-violet-700 ring-violet-500/20 dark:text-violet-300 dark:bg-violet-500/15",
-  split: "bg-cyan-500/10 text-cyan-700 ring-cyan-500/20 dark:text-cyan-300 dark:bg-cyan-500/15",
-  close: "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300 dark:bg-emerald-500/15",
-  wait: "bg-muted/60 text-muted-foreground ring-border",
+  ping: "bg-[var(--brand-gold)]/12 text-[var(--brand-gold)] ring-[var(--brand-gold)]/35",
+  escalate:
+    "bg-[var(--brand-crimson)]/15 text-[var(--brand-crimson)] ring-[var(--brand-crimson)]/40",
+  reassign:
+    "bg-[var(--brand-bright-gold)]/15 text-[var(--brand-bright-gold)] ring-[var(--brand-bright-gold)]/40",
+  split:
+    "bg-[var(--brand-silver)]/12 text-[var(--brand-silver)] ring-[var(--brand-silver)]/30",
+  close:
+    "bg-[var(--brand-gold)]/22 text-[var(--brand-bright-gold)] ring-[var(--brand-gold)]/50",
+  wait: "bg-[var(--brand-silver)]/8 text-[var(--brand-silver)]/70 ring-[var(--brand-silver)]/20",
 };
 
 export function SuggestionBadge({ suggestion }: { suggestion: AiSuggestion }) {
@@ -20,7 +28,10 @@ export function SuggestionBadge({ suggestion }: { suggestion: AiSuggestion }) {
         tone,
       )}
     >
-      <span className="ai-shimmer pointer-events-none absolute inset-0" aria-hidden />
+      <span
+        className="ai-shimmer pointer-events-none absolute inset-0"
+        aria-hidden
+      />
       <span className="relative" aria-hidden>
         ✦
       </span>

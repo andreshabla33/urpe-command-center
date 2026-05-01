@@ -1,14 +1,16 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Brandbook-restringido: 4 variantes de la paleta federal en lugar de rainbow.
+ * Gold cálido / Gold brillante / Silver / Bone-translucent.
+ * Las iniciales se distinguen por la posición en la paleta (hash determinista),
+ * pero la composición visual queda austera.
+ */
 const PALETTE = [
-  "bg-violet-500/20 text-violet-700 dark:text-violet-300",
-  "bg-blue-500/20 text-blue-700 dark:text-blue-300",
-  "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300",
-  "bg-amber-500/20 text-amber-700 dark:text-amber-300",
-  "bg-rose-500/20 text-rose-700 dark:text-rose-300",
-  "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300",
-  "bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300",
-  "bg-orange-500/20 text-orange-700 dark:text-orange-300",
+  "bg-[var(--brand-gold)]/20 text-[var(--brand-bright-gold)]",
+  "bg-[var(--brand-bright-gold)]/22 text-[var(--brand-bright-gold)]",
+  "bg-[var(--brand-silver)]/18 text-[var(--brand-silver)]",
+  "bg-[var(--brand-bone)]/12 text-[var(--brand-bone)]",
 ];
 
 function hashToIndex(input: string, mod: number): number {

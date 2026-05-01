@@ -2,10 +2,10 @@ import { cn } from "@/lib/utils";
 import type { TaskPriority } from "../types";
 
 const PRIORITY_TONE: Record<TaskPriority, string> = {
-  p0: "bg-red-500/10 text-red-700 ring-red-500/20 dark:text-red-400 dark:bg-red-500/15",
-  p1: "bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-400 dark:bg-amber-500/15",
-  p2: "bg-muted/60 text-muted-foreground ring-border",
-  p3: "bg-muted/40 text-muted-foreground/60 ring-border",
+  p0: "bg-[var(--brand-crimson)]/15 text-[var(--brand-crimson)] ring-[var(--brand-crimson)]/40",
+  p1: "bg-[var(--brand-gold)]/15 text-[var(--brand-bright-gold)] ring-[var(--brand-gold)]/40",
+  p2: "bg-[var(--brand-silver)]/10 text-[var(--brand-silver)] ring-[var(--brand-silver)]/25",
+  p3: "bg-[var(--brand-silver)]/6 text-[var(--brand-silver)]/60 ring-[var(--brand-silver)]/15",
 };
 
 export function PriorityBadge({ priority }: { priority: string }) {
