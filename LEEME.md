@@ -3,7 +3,7 @@
 > Single pane of glass del ecosistema URPE. Operación en tiempo real sobre tareas, agentes IA, comunicaciones y métricas. Estética federal-government (Numero 18 Operations Division) — no SaaS genérico.
 >
 > **Producción:** https://urpe-command-center.vercel.app
-> **Repo:** https://github.com/andreshabla33/urpe-command-center
+> **Repo:** https://github.com/diegourquijo-personal/Urpeailab-command-center
 > **Stack:** Next.js 16 + Supabase + OpenRouter (Claude Opus 4.7 + GPT-5.2) + Tailwind v4 + shadcn/ui
 
 Este documento sirve dos audiencias en paralelo:
@@ -783,7 +783,7 @@ Las URLs y bearer (`urpe_service_role_key`) viven en Supabase Vault, no commitea
 - **AGENTS.md** (Next.js 16 specific): raíz del repo
 - **Supabase project**: `vecspltvmyopwbjzerow` (compartido con producción Mónica)
 - **Vercel project**: `andres-maldonados-projects-0d92e053/urpe-command-center`
-- **GitHub repo**: https://github.com/andreshabla33/urpe-command-center
+- **GitHub repo**: https://github.com/diegourquijo-personal/Urpeailab-command-center
 
 ## 16. Contacto
 

@@ -3,7 +3,7 @@
 > Guía paso a paso para empezar a usar el Command Center. Pensada tanto para humanos del equipo URPE como para agentes IA que necesitan operar el sistema.
 >
 > **Producción:** https://urpe-command-center.vercel.app
-> **Repo:** https://github.com/andreshabla33/urpe-command-center
+> **Repo:** https://github.com/diegourquijo-personal/Urpeailab-command-center
 > **Soporte:** Andres Maldonado (`am@urpeailab.com`) · Diego Urquijo (`dau@urpeailab.com`)
 
 ---
