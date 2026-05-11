@@ -87,7 +87,10 @@ export const POST = withApi(
     });
     if (!eventResult.ok) return serverError(eventResult.error);
 
-    void supabase.rpc("refresh_mv_task_current_state");
+    supabase.rpc("refresh_mv_task_current_state").then(
+      () => {},
+      () => {},
+    );
 
     const responseBody = {
       ok: true,

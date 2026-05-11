@@ -100,7 +100,10 @@ export function makeEventEndpoint<TBody>(opts: {
       if (!eventResult.ok) return serverError(eventResult.error);
 
       const supabase = createServiceRoleClient();
-      void supabase.rpc("refresh_mv_task_current_state");
+      supabase.rpc("refresh_mv_task_current_state").then(
+        () => {},
+        () => {},
+      );
 
       const responseBody = {
         ok: true,

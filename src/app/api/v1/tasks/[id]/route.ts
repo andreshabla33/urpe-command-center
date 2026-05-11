@@ -9,25 +9,33 @@ export const GET = withApi(
     const taskId = params?.id;
     if (!taskId) return badRequest("Missing task id");
 
+    // Canonical fields desde dim_task (read-after-write consistente).
+    // Aggregations desde mv_task_current_state (puede ir <1s atrasada).
     const supabase = createServiceRoleClient();
-    const { data, error } = await supabase
-      .from("mv_task_current_state")
-      .select("*")
-      .eq("id", taskId)
-      .maybeSingle();
-    if (error) return serverError(error.message);
-    if (!data) return notFound(`Task ${taskId}`);
+    const [taskRes, aggRes] = await Promise.all([
+      supabase.from("dim_task").select("*").eq("id", taskId).maybeSingle(),
+      supabase
+        .from("mv_task_current_state")
+        .select(
+          "last_event_at, event_count, escalation_count, last_inbound_at, last_outbound_at, age_days",
+        )
+        .eq("id", taskId)
+        .maybeSingle(),
+    ]);
+    if (taskRes.error) return serverError(taskRes.error.message);
+    if (!taskRes.data) return notFound(`Task ${taskId}`);
 
     const isPrivileged =
       token.ownerRole === "admin" || token.ownerRole === "liderazgo";
     if (
       !isPrivileged &&
-      data.owner_email !== token.ownerEmail &&
-      data.created_by !== token.ownerEmail
+      taskRes.data.owner_email !== token.ownerEmail &&
+      taskRes.data.created_by !== token.ownerEmail
     ) {
       return notFound(`Task ${taskId}`);
     }
 
+    const data = { ...taskRes.data, ...(aggRes.data ?? {}) };
     return ok({ data }, token);
   },
 );

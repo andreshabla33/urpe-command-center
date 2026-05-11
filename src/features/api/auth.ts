@@ -69,11 +69,16 @@ export async function resolveTokenFromRequest(
 
   if (!person || !person.is_active) return null;
 
-  // Update last_used_at fire-and-forget
-  void supabase
+  // Update last_used_at fire-and-forget. PostgrestBuilder es Thenable lazy —
+  // .then() es lo que dispara el fetch; void no lo invoca y la request nunca sale.
+  supabase
     .from("dim_user_token")
     .update({ last_used_at: new Date().toISOString() })
-    .eq("token_hash", tokenHash);
+    .eq("token_hash", tokenHash)
+    .then(
+      () => {},
+      () => {},
+    );
 
   return {
     tokenHash,
