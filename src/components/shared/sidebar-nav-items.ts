@@ -15,6 +15,11 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
+export type NavGroup = {
+  label: string;
+  items: readonly NavItem[];
+};
+
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Lista", shortcut: "g+l", icon: ListChecks },
   { href: "/kanban", label: "Kanban", shortcut: "g+k", icon: Columns3 },
@@ -22,4 +27,28 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/graph", label: "Grafo", shortcut: "g+g", icon: Network },
   { href: "/analytics", label: "Analytics", shortcut: "g+a", icon: LineChart },
   { href: "/office", label: "Office", shortcut: "g+o", icon: Bot },
+] as const;
+
+export const NAV_GROUPS: readonly NavGroup[] = [
+  {
+    label: "Trabajo",
+    items: [
+      { href: "/", label: "Lista", shortcut: "g+l", icon: ListChecks },
+      { href: "/kanban", label: "Kanban", shortcut: "g+k", icon: Columns3 },
+      { href: "/calendar", label: "Calendario", shortcut: "g+c", icon: CalendarDays },
+      { href: "/graph", label: "Grafo", shortcut: "g+g", icon: Network },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { href: "/analytics", label: "Analytics", shortcut: "g+a", icon: LineChart },
+    ],
+  },
+  {
+    label: "Comunicación",
+    items: [
+      { href: "/office", label: "Office", shortcut: "g+o", icon: Bot },
+    ],
+  },
 ] as const;

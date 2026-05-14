@@ -70,21 +70,21 @@ export function QuickStatusMenu({
         onClick={toggle}
         aria-label="Cambiar status"
         className={cn(
-          "flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground",
+          "flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
           open ? "opacity-100" : "opacity-0 group-hover/row:opacity-100",
         )}
       >
         ⋯
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-1 min-w-32 rounded-md border bg-popover py-1 shadow-md">
+        <div className="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border bg-popover py-1 shadow-md">
           {TASK_STATUS.map((s) => (
             <button
               key={s}
               type="button"
               onClick={(e) => pickStatus(s, e)}
               className={cn(
-                "block w-full px-3 py-1 text-left text-xs hover:bg-accent",
+                "block w-full px-3 py-2 text-left text-xs hover:bg-accent",
                 s === currentStatus
                   ? "font-medium text-foreground"
                   : "text-muted-foreground",

@@ -12,7 +12,7 @@ export function TaskRow({ task }: { task: TaskRowType }) {
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className="group/row relative grid grid-cols-[60px_1fr_180px_180px_110px_60px_70px_24px] items-center gap-3 border-b px-4 py-(--row-py) transition-colors hover:bg-accent/40 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-primary before:opacity-0 before:transition-opacity hover:before:opacity-100"
+      className="group/row relative grid grid-cols-[60px_1fr_180px_180px_110px_60px_70px_40px] items-center gap-3 border-b px-4 py-(--row-py) transition-colors hover:bg-accent/40 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-primary before:opacity-0 before:transition-opacity hover:before:opacity-100"
     >
       <span className="font-mono text-[11px] text-muted-foreground/80 truncate">
         {task.id}

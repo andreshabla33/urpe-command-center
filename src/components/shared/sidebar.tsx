@@ -117,20 +117,20 @@ function ExpandedFooter({ userEmail }: { userEmail: string }) {
     <>
       <OfflineIndicator />
       <p className="mt-2 truncate text-muted-foreground">{userEmail}</p>
-      <div className="mt-2 flex flex-col gap-1">
+      <div className="mt-2 flex flex-col gap-0.5">
         <ThemeToggle />
         <DensityToggle />
         <PushToggle />
         <a
           href="/settings/tokens"
-          className="text-xs text-muted-foreground hover:text-foreground"
+          className="flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
         >
           Tokens API
         </a>
         <form action={signOut}>
           <button
             type="submit"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="flex h-8 w-full items-center rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
           >
             Salir
           </button>

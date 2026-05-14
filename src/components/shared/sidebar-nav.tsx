@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { NAV_ITEMS, type NavItem } from "./sidebar-nav-items";
+import { NAV_GROUPS, type NavItem } from "./sidebar-nav-items";
 import { useSidebarCollapsed } from "./use-sidebar-collapsed";
 import { cn } from "@/lib/utils";
 
@@ -23,24 +23,38 @@ export function SidebarNav({ onNavigate, forceExpanded }: Props) {
 
   return (
     <nav className={cn("flex-1 py-4", showCollapsed ? "px-2" : "px-3")}>
-      <ul className="space-y-0.5">
-        {NAV_ITEMS.map((item) => {
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
-          return (
-            <li key={item.href}>
-              <NavLink
-                item={item}
-                isActive={isActive}
-                collapsed={showCollapsed}
-                onNavigate={onNavigate}
-              />
-            </li>
-          );
-        })}
-      </ul>
+      <div className="space-y-4">
+        {NAV_GROUPS.map((group, gi) => (
+          <div key={group.label}>
+            {!showCollapsed && (
+              <p className="px-3 pb-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/80">
+                {group.label}
+              </p>
+            )}
+            {showCollapsed && gi > 0 && (
+              <div className="mx-1 mb-2 h-px bg-border/60" aria-hidden />
+            )}
+            <ul className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href);
+                return (
+                  <li key={item.href}>
+                    <NavLink
+                      item={item}
+                      isActive={isActive}
+                      collapsed={showCollapsed}
+                      onNavigate={onNavigate}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
     </nav>
   );
 }

@@ -106,10 +106,10 @@ export function TaskFilters({ owners, current, statusCounts }: Props) {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
+    <div className="flex flex-wrap items-center gap-2 text-xs [aside_&]:flex-col [aside_&]:items-stretch">
       <form
         onSubmit={submitQuery}
-        className="flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 transition-colors focus-within:ring-1 focus-within:ring-ring"
+        className="flex h-9 items-center gap-2 rounded-md border bg-background pl-2.5 pr-1 transition-colors focus-within:ring-1 focus-within:ring-ring [aside_&]:w-full"
       >
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
           /
@@ -120,13 +120,13 @@ export function TaskFilters({ owners, current, statusCounts }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar título, ID, descripción"
-          className="w-56 bg-transparent text-xs placeholder:text-muted-foreground focus:outline-none"
+          className="w-56 min-w-0 bg-transparent text-xs placeholder:text-muted-foreground focus:outline-none [aside_&]:w-full [aside_&]:flex-1"
         />
         {query && (
           <button
             type="button"
             onClick={clearQuery}
-            className="text-[10px] text-muted-foreground hover:text-foreground"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
             aria-label="Limpiar búsqueda"
           >
             ✕
@@ -188,7 +188,7 @@ function FilterCombobox({
           type="button"
           aria-expanded={open}
           className={cn(
-            "flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs transition-colors hover:bg-accent/40",
+            "flex h-9 items-center gap-1.5 rounded-md border bg-background px-3 text-xs transition-colors hover:bg-accent/40",
             open && "ring-1 ring-ring",
           )}
         >

@@ -1,6 +1,7 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import Link from "next/link";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { setTaskStatus } from "../actions";
@@ -10,6 +11,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import type { TaskRow } from "../queries";
 import type { TaskStatus } from "../types";
 import { enqueueMutation } from "@/lib/offline/queue";
+import { ownerColor } from "@/lib/owner-color";
 
 const COLUMNS: { id: TaskStatus; label: string }[] = [
   { id: "backlog", label: "Backlog" },
@@ -18,12 +20,29 @@ const COLUMNS: { id: TaskStatus; label: string }[] = [
   { id: "escalated", label: "Escalada" },
   { id: "responded", label: "Respondida" },
   { id: "done", label: "Completa" },
+  { id: "cancelled", label: "Cancelada" },
 ];
+
+const SHOW_CANCELLED_KEY = "urpe-kanban-show-cancelled";
 
 type OptimisticAction = { taskId: string; status: TaskStatus };
 
 export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
   const [, startTransition] = useTransition();
+  const [showCancelled, setShowCancelled] = useState(false);
+
+  useEffect(() => {
+    setShowCancelled(localStorage.getItem(SHOW_CANCELLED_KEY) === "1");
+  }, []);
+
+  function toggleCancelled() {
+    setShowCancelled((prev) => {
+      const next = !prev;
+      localStorage.setItem(SHOW_CANCELLED_KEY, next ? "1" : "0");
+      return next;
+    });
+  }
+
   const [optimisticTasks, applyOptimistic] = useOptimistic(
     tasks,
     (state: TaskRow[], action: OptimisticAction) =>
@@ -72,69 +91,109 @@ export function KanbanBoard({ tasks }: { tasks: TaskRow[] }) {
     if (byColumn[s]) byColumn[s].push(t);
   }
 
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex h-full gap-3 overflow-x-auto px-4 sm:px-6 py-3 sm:py-4">
-        {COLUMNS.map((col) => (
-          <Droppable droppableId={col.id} key={col.id}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={
-                  "flex w-64 sm:w-72 shrink-0 flex-col rounded-md border bg-muted/30 transition-colors " +
-                  (snapshot.isDraggingOver ? "border-primary/60 bg-accent/30" : "border-border/70")
-                }
-              >
-                <div className="flex items-center justify-between border-b border-border/70 px-3 py-2">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {col.label}
-                  </p>
-                  <span className="rounded-full bg-background/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground tabular-nums">
-                    {byColumn[col.id].length}
-                  </span>
-                </div>
+  const visibleColumns = showCancelled
+    ? COLUMNS
+    : COLUMNS.filter((c) => c.id !== "cancelled");
 
-                <div className="flex flex-1 flex-col gap-2 p-2 overflow-y-auto">
-                  {byColumn[col.id].map((task, idx) => (
-                    <Draggable draggableId={task.id ?? ""} index={idx} key={task.id}>
-                      {(p, s) => (
-                        <div
-                          ref={p.innerRef}
-                          {...p.draggableProps}
-                          {...p.dragHandleProps}
-                          className={
-                            "rounded-md border border-border/70 bg-card p-2.5 text-sm transition-shadow shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:shadow-[0_2px_8px_rgb(0_0_0/0.06)] " +
-                            (s.isDragging ? "shadow-lg ring-1 ring-primary/30" : "")
-                          }
-                        >
-                          <p className="font-mono text-[10px] text-muted-foreground/80">
-                            {task.id}
-                          </p>
-                          <p className="mt-0.5 line-clamp-2 text-xs font-medium text-foreground">
-                            {task.title}
-                          </p>
-                          <div className="mt-2 flex items-center justify-between gap-2">
-                            <span className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
-                              <UserAvatar email={task.owner_email} size="xs" />
-                              <span className="truncate">{task.owner_email}</span>
-                            </span>
-                            <div className="flex shrink-0 gap-1">
-                              <PriorityBadge priority={task.priority ?? "p2"} />
-                              <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              </div>
-            )}
-          </Droppable>
-        ))}
+  return (
+    <>
+      <div className="flex items-center justify-end border-b px-4 sm:px-6 py-2 text-xs">
+        <button
+          type="button"
+          onClick={toggleCancelled}
+          aria-pressed={showCancelled}
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
+        >
+          <span
+            aria-hidden
+            className={
+              "h-2 w-2 rounded-full transition-colors " +
+              (showCancelled ? "bg-primary" : "bg-muted-foreground/40")
+            }
+          />
+          {showCancelled ? "Ocultar canceladas" : "Mostrar canceladas"}
+          <span className="font-mono text-[10px] text-muted-foreground/70 tabular-nums">
+            {byColumn.cancelled.length}
+          </span>
+        </button>
       </div>
-    </DragDropContext>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex h-full gap-3 overflow-x-auto px-4 sm:px-6 py-3 sm:py-4">
+          {visibleColumns.map((col) => (
+            <Droppable droppableId={col.id} key={col.id}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={
+                    "flex w-64 sm:w-72 shrink-0 flex-col rounded-md border bg-muted/30 transition-colors " +
+                    (snapshot.isDraggingOver ? "border-primary/60 bg-accent/30" : "border-border/70")
+                  }
+                >
+                  <div className="flex items-center justify-between border-b border-border/70 px-3 py-2">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {col.label}
+                    </p>
+                    <span className="rounded-full bg-background/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground tabular-nums">
+                      {byColumn[col.id].length}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-2 p-2 overflow-y-auto">
+                    {byColumn[col.id].map((task, idx) => {
+                      const color = ownerColor(task.owner_email);
+                      return (
+                        <Draggable draggableId={task.id ?? ""} index={idx} key={task.id}>
+                          {(p, s) => (
+                            <div
+                              ref={p.innerRef}
+                              {...p.draggableProps}
+                              {...p.dragHandleProps}
+                              style={{
+                                ...p.draggableProps.style,
+                                borderLeftColor: color.bar,
+                              }}
+                              className={
+                                "relative rounded-md border border-l-[3px] border-border/70 bg-card text-sm transition-shadow shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:shadow-[0_2px_8px_rgb(0_0_0/0.06)] " +
+                                (s.isDragging ? "shadow-lg ring-1 ring-primary/30" : "")
+                              }
+                            >
+                              <Link
+                                href={`/tasks/${task.id}`}
+                                draggable={false}
+                                className="block p-3"
+                              >
+                                <p className="font-mono text-[10px] text-muted-foreground/80">
+                                  {task.id}
+                                </p>
+                                <p className="mt-1 line-clamp-2 text-xs font-medium text-foreground">
+                                  {task.title}
+                                </p>
+                                <div className="mt-2 flex items-center justify-between gap-2">
+                                  <span className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+                                    <UserAvatar email={task.owner_email} size="xs" />
+                                    <span className="truncate">{task.owner_email ?? "—"}</span>
+                                  </span>
+                                  <div className="flex shrink-0 gap-1">
+                                    <PriorityBadge priority={task.priority ?? "p2"} />
+                                    <AgeBadge ageDays={task.age_days} createdAt={task.created_at} />
+                                  </div>
+                                </div>
+                              </Link>
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
+                  </div>
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+    </>
   );
 }

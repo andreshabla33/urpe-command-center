@@ -11,9 +11,12 @@ import { TaskRow } from "@/features/tasks/components/task-row";
 import { TaskListHeader } from "@/features/tasks/components/task-list-header";
 import { KpiStrip } from "@/components/shared/kpi-strip";
 import { TaskFilters } from "@/features/tasks/components/task-filters";
+import { SavedViews } from "@/features/tasks/components/saved-views";
+import { FiltersPanel } from "@/features/tasks/components/filters-panel";
 import { NewTaskButton } from "@/features/tasks/components/new-task-button";
 import { SuggestionsBar } from "@/features/tasks/components/suggestions-bar";
 import { MotionList } from "@/components/shared/motion-list";
+import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -30,6 +33,11 @@ export default async function HomePage({ searchParams }: PageProps) {
     sort: raw.sort,
     dir: raw.dir,
   });
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const [kpis, tasks, owners, statusCounts, trend] = await Promise.all([
     getKpis(),
@@ -59,17 +67,23 @@ export default async function HomePage({ searchParams }: PageProps) {
         <SuggestionsBar />
       </Suspense>
 
-      <div className="border-b px-4 sm:px-6 py-3 overflow-x-auto">
+      <div className="border-b px-4 sm:px-6 pt-3 pb-2 overflow-x-auto">
         <Suspense fallback={null}>
-          <TaskFilters
-            owners={owners}
-            current={filters}
-            statusCounts={statusCounts}
-          />
+          <SavedViews userEmail={user?.email ?? null} />
         </Suspense>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <FiltersPanel
+        filters={
+          <Suspense fallback={null}>
+            <TaskFilters
+              owners={owners}
+              current={filters}
+              statusCounts={statusCounts}
+            />
+          </Suspense>
+        }
+      >
         {tasks.length === 0 ? (
           <div className="flex flex-col items-center gap-4 px-4 sm:px-6 py-20 text-center">
             <p className="h-caption text-[10px] tracking-[0.2em]">
@@ -96,7 +110,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             </MotionList>
           </div>
         )}
-      </div>
+      </FiltersPanel>
     </main>
   );
 }
